@@ -28,12 +28,12 @@ public class FilmController {
 
     @PostMapping(value = "/films")
     public Film createFilm(@RequestBody Film film) {
-        if (film.getName().isBlank() || film.getName() == null){
+        if (film.getName().isBlank() || film.getName() == null) {
             log.info("Пользователь неверно ввел имя фильма: {}", film.getName());
             throw new ValidationException("Название фильма не может быть пустым");
         }
         if (film.getDescription().isBlank() || film.getDescription().length() > MAX_SYMBOLS) {
-            log.info("Пользователь неверно ввел описание фильма {}, количество символов {}", film.getDescription(),film.getDescription().length());
+            log.info("Пользователь неверно ввел описание фильма {}, количество символов {}", film.getDescription(), film.getDescription().length());
             throw new ValidationException("Описание не может быть пустым или превышать 200 символов");
         }
         if (film.getReleaseDate().isBefore(RELEASE_DATA)) {
@@ -52,12 +52,12 @@ public class FilmController {
 
     @PutMapping(value = "/films")
     public Film update(@RequestBody Film film) {
-        if (film.getName().isBlank() || film.getName() == null){
+        if (film.getName().isBlank() || film.getName() == null) {
             log.info("Пользователь неверно ввел имя фильма: {}", film.getName());
             throw new ValidationException("Название фильма не может быть пустым");
         }
         if (film.getDescription().isBlank() || film.getDescription().length() > MAX_SYMBOLS) {
-            log.info("Пользователь неверно ввел описание фильма {}, количество символов {}", film.getDescription(),film.getDescription().length());
+            log.info("Пользователь неверно ввел описание фильма {}, количество символов {}", film.getDescription(), film.getDescription().length());
             throw new ValidationException("Описание не может быть пустым или превышать 200 символов");
         }
         if (film.getReleaseDate().isBefore(RELEASE_DATA)) {
@@ -68,7 +68,7 @@ public class FilmController {
             log.info("Пользователь неверно указал продолжительность фильма: {}", film.getDuration());
             throw new ValidationException("Продолжительность фильма должна быть положительной");
         }
-        if (!films.containsKey(film.getId())){
+        if (!films.containsKey(film.getId())) {
             log.info("Пользователь неверно ввел id фильма: {}", film.getId());
             throw new ValidationException("Нет фильма с таким id");
         }
