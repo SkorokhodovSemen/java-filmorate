@@ -62,6 +62,7 @@ public class FilmControllerTest {
             .description("Хороший фильм")
             .releaseDate(LocalDate.of(2004, 10, 14))
             .duration(-120).build();
+
     @Test
     void getFilm() {
         filmController.createFilm(filmStandard);
@@ -74,6 +75,7 @@ public class FilmControllerTest {
         filmController.createFilm(filmStandard);
         assertEquals(filmStandard.getId(), 1);
     }
+
     @Test
     void postFilmInvalidName() {
         final ValidationException exception = assertThrows(ValidationException.class, new Executable() {
@@ -84,6 +86,7 @@ public class FilmControllerTest {
         });
         assertEquals("Название фильма не может быть пустым", exception.getMessage());
     }
+
     @Test
     void postFilmInvalidDescription() {
         final ValidationException exception = assertThrows(ValidationException.class, new Executable() {
@@ -123,6 +126,7 @@ public class FilmControllerTest {
         Film film = filmController.update(filmStandardWithId);
         assertEquals(film, filmStandardWithId);
     }
+
     @Test
     void putFilmInvalidName() {
         final ValidationException exception = assertThrows(ValidationException.class, new Executable() {
