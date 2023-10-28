@@ -7,8 +7,8 @@ import java.time.LocalDate;
 
 @Builder
 @Data
-public class User {
-    private int id;
+public class User extends Entity{
+//    private int id;
     private String email;
     private String login;
     private String name;

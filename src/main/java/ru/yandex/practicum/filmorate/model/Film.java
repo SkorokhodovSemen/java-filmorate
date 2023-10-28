@@ -7,10 +7,11 @@ import java.time.LocalDate;
 
 @Builder
 @Data
-public class Film {
-    private int id;
+public class Film extends Entity{
+//    private int id;
     private String name;
     private String description;
     private LocalDate releaseDate;
     private long duration;
+
 }

@@ -13,19 +13,12 @@ import java.util.List;
 import java.util.Map;
 
 @RestController
-public class UserController {
-    private final Map<Integer, User> users = new HashMap<>();
-    private int id = 1;
-    private static final Logger log = LoggerFactory.getLogger(UserController.class);
+@RequestMapping("/users")
+public class UserController extends EntityController<User> {
 
-    @GetMapping("/users")
-    public List<User> findAll() {
-        log.info("Количество пользователей в данный момент: {}", users.size());
-        return new ArrayList<>(users.values());
-    }
-
-    @PostMapping(value = "/users")
-    public User createUser(@RequestBody User user) {
+    @Override
+    @PostMapping
+    public User create(@RequestBody User user) {
         if (user.getEmail().isBlank() || !user.getEmail().contains("@") || user.getEmail() == null) {
             log.info("Пользователь неверно ввел почту: {}", user.getEmail());
             throw new ValidationException("Неверный формат почты или поле не заполнено");
@@ -42,13 +35,14 @@ public class UserController {
             user.setName(user.getLogin());
         }
         user.setId(id);
-        users.put(id, user);
+        storage.put(id, user);
         log.debug("Пользователь {} сохранен и получил уникальный id {}", user, user.getId());
         id++;
         return user;
     }
 
-    @PutMapping(value = "/users")
+    @Override
+    @PutMapping
     public User update(@RequestBody User user) {
         if (user.getEmail().isBlank() || !user.getEmail().contains("@") || user.getEmail() == null) {
             log.info("Пользователь неверно ввел почту: {}", user.getEmail());
@@ -62,11 +56,11 @@ public class UserController {
             log.info("Пользователь неверно ввел дату рождения: {}", user.getBirthday());
             throw new ValidationException("Дата рождения не может быть в будущем");
         }
-        if (!users.containsKey(user.getId())) {
+        if (!storage.containsKey(user.getId())) {
             log.info("Пользователь неверно ввел id: {}", user.getId());
             throw new ValidationException("Нет пользователя с таким id");
         }
-        users.put(user.getId(), user);
+        storage.put(user.getId(), user);
         log.debug("Пользователь {} обновил свои данные под id {}", user, user.getId());
         return user;
     }

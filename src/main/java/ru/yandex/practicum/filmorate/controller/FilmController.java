@@ -13,21 +13,13 @@ import java.util.List;
 import java.util.Map;
 
 @RestController
-public class FilmController {
+@RequestMapping("/films")
+public class FilmController extends EntityController<Film> {
     private static final int MAX_SYMBOLS = 200;
     private static final LocalDate RELEASE_DATA = LocalDate.of(1895, 12, 28);
-    private final Map<Integer, Film> films = new HashMap<>();
-    private int id = 1;
-    private static final Logger log = LoggerFactory.getLogger(FilmController.class);
-
-    @GetMapping("/films")
-    public List<Film> findAll() {
-        log.info("Общее количество фильмов: {}", films.size());
-        return new ArrayList<>(films.values());
-    }
-
-    @PostMapping(value = "/films")
-    public Film createFilm(@RequestBody Film film) {
+    @Override
+    @PostMapping
+    public Film create(@RequestBody Film film) {
         if (film.getName().isBlank() || film.getName() == null) {
             log.info("Пользователь неверно ввел имя фильма: {}", film.getName());
             throw new ValidationException("Название фильма не может быть пустым");
@@ -45,12 +37,13 @@ public class FilmController {
             throw new ValidationException("Продолжительность фильма должна быть положительной");
         }
         film.setId(id);
-        films.put(id, film);
+        storage.put(id, film);
         id++;
         return film;
     }
 
-    @PutMapping(value = "/films")
+    @Override
+    @PutMapping
     public Film update(@RequestBody Film film) {
         if (film.getName().isBlank() || film.getName() == null) {
             log.info("Пользователь неверно ввел имя фильма: {}", film.getName());
@@ -68,11 +61,11 @@ public class FilmController {
             log.info("Пользователь неверно указал продолжительность фильма: {}", film.getDuration());
             throw new ValidationException("Продолжительность фильма должна быть положительной");
         }
-        if (!films.containsKey(film.getId())) {
+        if (!storage.containsKey(film.getId())) {
             log.info("Пользователь неверно ввел id фильма: {}", film.getId());
             throw new ValidationException("Нет фильма с таким id");
         }
-        films.put(film.getId(), film);
+        storage.put(film.getId(), film);
         log.debug("Пользователь обновил фильм {} под id {}", film, film.getId());
         return film;
     }
