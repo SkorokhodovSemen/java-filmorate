@@ -5,7 +5,6 @@ import org.slf4j.LoggerFactory;
 import org.springframework.web.bind.annotation.*;
 import ru.yandex.practicum.filmorate.exception.ValidationException;
 import ru.yandex.practicum.filmorate.model.Entity;
-import ru.yandex.practicum.filmorate.model.Film;
 
 import java.util.ArrayList;
 import java.util.HashMap;
