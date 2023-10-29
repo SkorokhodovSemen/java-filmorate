@@ -26,7 +26,7 @@ public class FilmControllerTest {
     Film filmInvalidDurationWithId = new Film();
 
     @BeforeEach
-    public void BeforeEach() {
+    public void beforeEach() {
         filmStandard.setName("Терминал");
         filmStandard.setDescription("Хороший фильм");
         filmStandard.setReleaseDate(LocalDate.of(2004, 10, 14));

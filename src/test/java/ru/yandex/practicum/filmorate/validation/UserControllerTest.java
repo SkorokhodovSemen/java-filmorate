@@ -26,7 +26,7 @@ public class UserControllerTest {
     User userWithoutName = new User();
 
     @BeforeEach
-    public void BeforeEach() {
+    public void beforeEach() {
         userStandard.setName("Semen");
         userStandard.setEmail("yandex@yandex.ru");
         userStandard.setLogin("SuperSam");
