@@ -1,5 +1,6 @@
 package ru.yandex.practicum.filmorate.validation;
 
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.function.Executable;
 import ru.yandex.practicum.filmorate.controller.FilmController;
@@ -13,55 +14,69 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 
 public class FilmControllerTest {
     FilmController filmController = new FilmController();
-    Film filmStandard = Film.builder().name("Терминал")
-            .description("Хороший фильм")
-            .releaseDate(LocalDate.of(2004, 10, 14))
-            .duration(120).build();
-    Film filmStandardWithId = Film.builder().id(1)
-            .name("Терминал")
-            .description("Хороший фильм")
-            .releaseDate(LocalDate.of(2004, 10, 14))
-            .duration(120).build();
-    Film filmInvalidName = Film.builder().name("")
-            .description("Хороший фильм")
-            .releaseDate(LocalDate.of(2004, 10, 14))
-            .duration(120).build();
-    Film filmInvalidNameWithId = Film.builder().id(1)
-            .name("")
-            .description("Хороший фильм")
-            .releaseDate(LocalDate.of(2004, 10, 14))
-            .duration(120).build();
-    Film filmInvalidDescription = Film.builder().name("Терминал")
-            .description("228 символов" +
-                    "                                                                                                            " +
-                    "                                                                                                            ")
-            .releaseDate(LocalDate.of(2004, 10, 14))
-            .duration(120).build();
-    Film filmInvalidDescriptionWithId = Film.builder().id(1)
-            .name("Терминал")
-            .description("228 символов" +
-                    "                                                                                                            " +
-                    "                                                                                                            ")
-            .releaseDate(LocalDate.of(2004, 10, 14))
-            .duration(120).build();
-    Film filmInvalidData = Film.builder().name("Терминал")
-            .description("Хороший фильм")
-            .releaseDate(LocalDate.of(1800, 10, 14))
-            .duration(120).build();
-    Film filmInvalidDataWithId = Film.builder().id(1)
-            .name("Терминал")
-            .description("Хороший фильм")
-            .releaseDate(LocalDate.of(1800, 10, 14))
-            .duration(120).build();
-    Film filmInvalidDuration = Film.builder().name("Терминал")
-            .description("Хороший фильм")
-            .releaseDate(LocalDate.of(2004, 10, 14))
-            .duration(-120).build();
-    Film filmInvalidDurationWithId = Film.builder().id(1)
-            .name("Терминал")
-            .description("Хороший фильм")
-            .releaseDate(LocalDate.of(2004, 10, 14))
-            .duration(-120).build();
+    Film filmStandard = new Film();
+    Film filmStandardWithId = new Film();
+    Film filmInvalidName = new Film();
+    Film filmInvalidNameWithId = new Film();
+    Film filmInvalidDescription = new Film();
+    Film filmInvalidDescriptionWithId = new Film();
+    Film filmInvalidData = new Film();
+    Film filmInvalidDataWithId = new Film();
+    Film filmInvalidDuration = new Film();
+    Film filmInvalidDurationWithId = new Film();
+
+    @BeforeEach
+    public void BeforeEach() {
+        filmStandard.setName("Терминал");
+        filmStandard.setDescription("Хороший фильм");
+        filmStandard.setReleaseDate(LocalDate.of(2004, 10, 14));
+        filmStandard.setDuration(120);
+        filmStandardWithId.setId(1);
+        filmStandardWithId.setName("Терминал");
+        filmStandardWithId.setDescription("Хороший фильм");
+        filmStandardWithId.setReleaseDate(LocalDate.of(2004, 10, 14));
+        filmStandardWithId.setDuration(120);
+        filmInvalidName.setName("");
+        filmInvalidName.setDescription("Хороший фильм");
+        filmInvalidName.setReleaseDate(LocalDate.of(2004, 10, 14));
+        filmInvalidName.setDuration(120);
+        filmInvalidNameWithId.setId(1);
+        filmInvalidNameWithId.setName("");
+        filmInvalidNameWithId.setDescription("Хороший фильм");
+        filmInvalidNameWithId.setReleaseDate(LocalDate.of(2004, 10, 14));
+        filmInvalidNameWithId.setDuration(120);
+        filmInvalidDescription.setName("Терминал");
+        filmInvalidDescription.setDescription("228 символов" +
+                "                                                                                                            " +
+                "                                                                                                            ");
+        filmInvalidDescription.setReleaseDate(LocalDate.of(2004, 10, 14));
+        filmInvalidDescription.setDuration(120);
+        filmInvalidDescriptionWithId.setId(1);
+        filmInvalidDescriptionWithId.setName("Терминал");
+        filmInvalidDescriptionWithId.setDescription("228 символов" +
+                "                                                                                                            " +
+                "                                                                                                            ");
+        filmInvalidDescriptionWithId.setReleaseDate(LocalDate.of(2004, 10, 14));
+        filmInvalidDescriptionWithId.setDuration(120);
+        filmInvalidData.setName("Терминал");
+        filmInvalidData.setDescription("Хороший фильм");
+        filmInvalidData.setReleaseDate(LocalDate.of(1800, 10, 14));
+        filmInvalidData.setDuration(120);
+        filmInvalidDataWithId.setId(1);
+        filmInvalidDataWithId.setName("Терминал");
+        filmInvalidDataWithId.setDescription("Хороший фильм");
+        filmInvalidDataWithId.setReleaseDate(LocalDate.of(1800, 10, 14));
+        filmInvalidDataWithId.setDuration(120);
+        filmInvalidDuration.setName("Терминал");
+        filmInvalidDuration.setDescription("Хороший фильм");
+        filmInvalidDuration.setReleaseDate(LocalDate.of(2004, 10, 14));
+        filmInvalidDuration.setDuration(-120);
+        filmInvalidDurationWithId.setId(1);
+        filmInvalidDurationWithId.setName("Терминал");
+        filmInvalidDurationWithId.setDescription("Хороший фильм");
+        filmInvalidDurationWithId.setReleaseDate(LocalDate.of(2004, 10, 14));
+        filmInvalidDurationWithId.setDuration(-120);
+    }
 
     @Test
     void getFilm() {
