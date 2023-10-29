@@ -65,14 +65,14 @@ public class UserControllerTest {
 
     @Test
     void getUser() {
-        userController.createUser(userStandard);
+        userController.create(userStandard);
         assertFalse(userController.findAll().isEmpty());
         assertEquals(userController.findAll().size(), 1);
     }
 
     @Test
     void postUserStandard() {
-        userController.createUser(userStandard);
+        userController.create(userStandard);
         assertEquals(userStandard.getId(), 1);
     }
 
@@ -81,7 +81,7 @@ public class UserControllerTest {
         final ValidationException exception = assertThrows(ValidationException.class, new Executable() {
             @Override
             public void execute() throws Throwable {
-                userController.createUser(userInvalidEmail);
+                userController.create(userInvalidEmail);
             }
         });
         assertEquals("Неверный формат почты или поле не заполнено", exception.getMessage());
@@ -92,7 +92,7 @@ public class UserControllerTest {
         final ValidationException exception = assertThrows(ValidationException.class, new Executable() {
             @Override
             public void execute() throws Throwable {
-                userController.createUser(userInvalidLogin);
+                userController.create(userInvalidLogin);
             }
         });
         assertEquals("Логин не может быть пустым или содержать пробелы", exception.getMessage());
@@ -103,7 +103,7 @@ public class UserControllerTest {
         final ValidationException exception = assertThrows(ValidationException.class, new Executable() {
             @Override
             public void execute() throws Throwable {
-                userController.createUser(userInvalidBirthday);
+                userController.create(userInvalidBirthday);
             }
         });
         assertEquals("Дата рождения не может быть в будущем", exception.getMessage());
@@ -111,19 +111,20 @@ public class UserControllerTest {
 
     @Test
     void postUserWithoutName() {
-        User user = userController.createUser(userWithoutName);
+        User user = userController.create(userWithoutName);
         assertEquals(user.getName(), user.getLogin());
     }
 
     @Test
     void putUserStandard() {
-        userController.createUser(userStandard);
+        userController.create(userStandard);
         User user = userController.update(userStandardWithId);
         assertEquals(user.getLogin(), "SeriousSam");
     }
 
     @Test
     void putUserInvalidEmail() {
+        userController.create(userStandard);
         final ValidationException exception = assertThrows(ValidationException.class, new Executable() {
             @Override
             public void execute() throws Throwable {
@@ -135,6 +136,7 @@ public class UserControllerTest {
 
     @Test
     void putUserInvalidLogin() {
+        userController.create(userStandard);
         final ValidationException exception = assertThrows(ValidationException.class, new Executable() {
             @Override
             public void execute() throws Throwable {
@@ -146,6 +148,7 @@ public class UserControllerTest {
 
     @Test
     void putUserInvalidBirthday() {
+        userController.create(userStandard);
         final ValidationException exception = assertThrows(ValidationException.class, new Executable() {
             @Override
             public void execute() throws Throwable {
@@ -163,6 +166,6 @@ public class UserControllerTest {
                 userController.update(userStandard);
             }
         });
-        assertEquals("Нет пользователя с таким id", exception.getMessage());
+        assertEquals("Id не найден, проверьте id", exception.getMessage());
     }
 }

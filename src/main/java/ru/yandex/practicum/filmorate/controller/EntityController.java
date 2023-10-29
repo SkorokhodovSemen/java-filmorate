@@ -26,11 +26,23 @@ public abstract class EntityController<T extends Entity> {
 
     @PostMapping
     public T create(@RequestBody T entity) {
+        validate(entity);
+        entity.setId(id);
+        storage.put(id, entity);
+        id++;
         return entity;
     }
 
     @PutMapping
     public T update(@RequestBody T entity) {
+        if (!storage.containsKey(entity.getId())) {
+            log.info("Не найден id: {}", entity.getId());
+            throw new ValidationException("Id не найден, проверьте id");
+        }
+        validate(entity);
+        storage.put(entity.getId(), entity);
         return entity;
     }
+
+    abstract void validate(T entity);
 }

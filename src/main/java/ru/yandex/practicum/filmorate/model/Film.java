@@ -2,13 +2,13 @@ package ru.yandex.practicum.filmorate.model;
 
 import lombok.Builder;
 import lombok.Data;
+import lombok.experimental.SuperBuilder;
 
 import java.time.LocalDate;
 
-@Builder
+@SuperBuilder
 @Data
-public class Film extends Entity{
-//    private int id;
+public class Film extends Entity {
     private String name;
     private String description;
     private LocalDate releaseDate;
