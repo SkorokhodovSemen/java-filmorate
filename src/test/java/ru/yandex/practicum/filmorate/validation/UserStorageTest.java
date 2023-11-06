@@ -3,18 +3,19 @@ package ru.yandex.practicum.filmorate.validation;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.function.Executable;
-import ru.yandex.practicum.filmorate.controller.UserController;
+import ru.yandex.practicum.filmorate.exception.NotFoundException;
 import ru.yandex.practicum.filmorate.exception.ValidationException;
 import ru.yandex.practicum.filmorate.model.User;
+import ru.yandex.practicum.filmorate.storage.InMemoryUserStorage;
 
 import java.time.LocalDate;
 
 import static org.junit.jupiter.api.Assertions.*;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
-public class UserControllerTest {
+public class UserStorageTest {
 
-    UserController userController = new UserController();
+    InMemoryUserStorage userStorage = new InMemoryUserStorage();
     User userStandard = new User();
     User userStandardWithId = new User();
     User userInvalidEmail = new User();
@@ -71,14 +72,14 @@ public class UserControllerTest {
 
     @Test
     void getUser() {
-        userController.create(userStandard);
-        assertFalse(userController.findAll().isEmpty());
-        assertEquals(userController.findAll().size(), 1);
+        userStorage.create(userStandard);
+        assertFalse(userStorage.findAll().isEmpty());
+        assertEquals(userStorage.findAll().size(), 1);
     }
 
     @Test
     void postUserStandard() {
-        userController.create(userStandard);
+        userStorage.create(userStandard);
         assertEquals(userStandard.getId(), 1);
     }
 
@@ -87,7 +88,7 @@ public class UserControllerTest {
         final ValidationException exception = assertThrows(ValidationException.class, new Executable() {
             @Override
             public void execute() throws Throwable {
-                userController.create(userInvalidEmail);
+                userStorage.create(userInvalidEmail);
             }
         });
         assertEquals("Неверный формат почты или поле не заполнено", exception.getMessage());
@@ -98,7 +99,7 @@ public class UserControllerTest {
         final ValidationException exception = assertThrows(ValidationException.class, new Executable() {
             @Override
             public void execute() throws Throwable {
-                userController.create(userInvalidLogin);
+                userStorage.create(userInvalidLogin);
             }
         });
         assertEquals("Логин не может быть пустым или содержать пробелы", exception.getMessage());
@@ -109,7 +110,7 @@ public class UserControllerTest {
         final ValidationException exception = assertThrows(ValidationException.class, new Executable() {
             @Override
             public void execute() throws Throwable {
-                userController.create(userInvalidBirthday);
+                userStorage.create(userInvalidBirthday);
             }
         });
         assertEquals("Дата рождения не может быть в будущем", exception.getMessage());
@@ -117,24 +118,24 @@ public class UserControllerTest {
 
     @Test
     void postUserWithoutName() {
-        User user = userController.create(userWithoutName);
+        User user = userStorage.create(userWithoutName);
         assertEquals(user.getName(), user.getLogin());
     }
 
     @Test
     void putUserStandard() {
-        userController.create(userStandard);
-        User user = userController.update(userStandardWithId);
+        userStorage.create(userStandard);
+        User user = userStorage.update(userStandardWithId);
         assertEquals(user.getLogin(), "SeriousSam");
     }
 
     @Test
     void putUserInvalidEmail() {
-        userController.create(userStandard);
+        userStorage.create(userStandard);
         final ValidationException exception = assertThrows(ValidationException.class, new Executable() {
             @Override
             public void execute() throws Throwable {
-                userController.update(userInvalidEmailWithId);
+                userStorage.update(userInvalidEmailWithId);
             }
         });
         assertEquals("Неверный формат почты или поле не заполнено", exception.getMessage());
@@ -142,11 +143,11 @@ public class UserControllerTest {
 
     @Test
     void putUserInvalidLogin() {
-        userController.create(userStandard);
+        userStorage.create(userStandard);
         final ValidationException exception = assertThrows(ValidationException.class, new Executable() {
             @Override
             public void execute() throws Throwable {
-                userController.update(userInvalidLoginWithId);
+                userStorage.update(userInvalidLoginWithId);
             }
         });
         assertEquals("Логин не может быть пустым или содержать пробелы", exception.getMessage());
@@ -154,11 +155,11 @@ public class UserControllerTest {
 
     @Test
     void putUserInvalidBirthday() {
-        userController.create(userStandard);
+        userStorage.create(userStandard);
         final ValidationException exception = assertThrows(ValidationException.class, new Executable() {
             @Override
             public void execute() throws Throwable {
-                userController.update(userInvalidBirthdayWithId);
+                userStorage.update(userInvalidBirthdayWithId);
             }
         });
         assertEquals("Дата рождения не может быть в будущем", exception.getMessage());
@@ -166,10 +167,10 @@ public class UserControllerTest {
 
     @Test
     void putUserWithoutId() {
-        final ValidationException exception = assertThrows(ValidationException.class, new Executable() {
+        final NotFoundException exception = assertThrows(NotFoundException.class, new Executable() {
             @Override
             public void execute() throws Throwable {
-                userController.update(userStandard);
+                userStorage.update(userStandard);
             }
         });
         assertEquals("Id не найден, проверьте id", exception.getMessage());
