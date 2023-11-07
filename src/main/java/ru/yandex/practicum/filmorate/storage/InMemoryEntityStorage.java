@@ -32,7 +32,7 @@ public class InMemoryEntityStorage<T extends Entity> implements EntityStorage<T>
 
     @Override
     public T create(T entity) {
-        validate(entity);
+//        validate(entity);
         entity.setId(id);
         storage.put(id, entity);
         id++;
@@ -45,12 +45,9 @@ public class InMemoryEntityStorage<T extends Entity> implements EntityStorage<T>
             log.info("Не найден id: {}", entity.getId());
             throw new NotFoundException("Id не найден, проверьте id");
         }
-        validate(entity);
+//        validate(entity);
         storage.put(entity.getId(), entity);
         return entity;
-    }
-
-    public void validate(T entity) {
     }
 
     public Map<Integer, T> getStorage() {

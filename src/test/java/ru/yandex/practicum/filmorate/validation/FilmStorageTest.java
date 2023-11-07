@@ -6,7 +6,9 @@ import org.junit.jupiter.api.function.Executable;
 import ru.yandex.practicum.filmorate.exception.NotFoundException;
 import ru.yandex.practicum.filmorate.exception.ValidationException;
 import ru.yandex.practicum.filmorate.model.Film;
+import ru.yandex.practicum.filmorate.service.FilmService;
 import ru.yandex.practicum.filmorate.storage.InMemoryFilmStorage;
+import ru.yandex.practicum.filmorate.storage.InMemoryUserStorage;
 
 import java.time.LocalDate;
 
@@ -14,7 +16,7 @@ import static org.junit.jupiter.api.Assertions.*;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
 public class FilmStorageTest {
-    InMemoryFilmStorage filmStorage = new InMemoryFilmStorage();
+    FilmService filmService = new FilmService(new InMemoryFilmStorage(), new InMemoryUserStorage());
     Film filmStandard = new Film();
     Film filmStandardWithId = new Film();
     Film filmInvalidName = new Film();
@@ -81,14 +83,14 @@ public class FilmStorageTest {
 
     @Test
     void getFilm() {
-        filmStorage.create(filmStandard);
-        assertFalse(filmStorage.findAll().isEmpty());
-        assertEquals(filmStorage.findAll().size(), 1);
+        filmService.create(filmStandard);
+        assertFalse(filmService.findAll().isEmpty());
+        assertEquals(filmService.findAll().size(), 1);
     }
 
     @Test
     void postFilmStandard() {
-        filmStorage.create(filmStandard);
+        filmService.create(filmStandard);
         assertEquals(filmStandard.getId(), 1);
     }
 
@@ -97,7 +99,7 @@ public class FilmStorageTest {
         final ValidationException exception = assertThrows(ValidationException.class, new Executable() {
             @Override
             public void execute() throws Throwable {
-                filmStorage.create(filmInvalidName);
+                filmService.create(filmInvalidName);
             }
         });
         assertEquals("Название фильма не может быть пустым", exception.getMessage());
@@ -108,7 +110,7 @@ public class FilmStorageTest {
         final ValidationException exception = assertThrows(ValidationException.class, new Executable() {
             @Override
             public void execute() throws Throwable {
-                filmStorage.create(filmInvalidDescription);
+                filmService.create(filmInvalidDescription);
             }
         });
         assertEquals("Описание не может быть пустым или превышать 200 символов", exception.getMessage());
@@ -119,7 +121,7 @@ public class FilmStorageTest {
         final ValidationException exception = assertThrows(ValidationException.class, new Executable() {
             @Override
             public void execute() throws Throwable {
-                filmStorage.create(filmInvalidData);
+                filmService.create(filmInvalidData);
             }
         });
         assertEquals("Дата релиза не может быть раньше 28 декабря 1895 года", exception.getMessage());
@@ -130,7 +132,7 @@ public class FilmStorageTest {
         final ValidationException exception = assertThrows(ValidationException.class, new Executable() {
             @Override
             public void execute() throws Throwable {
-                filmStorage.create(filmInvalidDuration);
+                filmService.create(filmInvalidDuration);
             }
         });
         assertEquals("Продолжительность фильма должна быть положительной", exception.getMessage());
@@ -138,18 +140,18 @@ public class FilmStorageTest {
 
     @Test
     void putFilmStandard() {
-        filmStorage.create(filmStandard);
-        Film film = filmStorage.update(filmStandardWithId);
+        filmService.create(filmStandard);
+        Film film = filmService.update(filmStandardWithId);
         assertEquals(film, filmStandardWithId);
     }
 
     @Test
     void putFilmInvalidName() {
-        filmStorage.create(filmStandard);
+        filmService.create(filmStandard);
         final ValidationException exception = assertThrows(ValidationException.class, new Executable() {
             @Override
             public void execute() throws Throwable {
-                filmStorage.update(filmInvalidNameWithId);
+                filmService.update(filmInvalidNameWithId);
             }
         });
         assertEquals("Название фильма не может быть пустым", exception.getMessage());
@@ -157,11 +159,11 @@ public class FilmStorageTest {
 
     @Test
     void putFilmInvalidDescription() {
-        filmStorage.create(filmStandard);
+        filmService.create(filmStandard);
         final ValidationException exception = assertThrows(ValidationException.class, new Executable() {
             @Override
             public void execute() throws Throwable {
-                filmStorage.update(filmInvalidDescriptionWithId);
+                filmService.update(filmInvalidDescriptionWithId);
             }
         });
         assertEquals("Описание не может быть пустым или превышать 200 символов", exception.getMessage());
@@ -169,11 +171,11 @@ public class FilmStorageTest {
 
     @Test
     void putFilmInvalidData() {
-        filmStorage.create(filmStandard);
+        filmService.create(filmStandard);
         final ValidationException exception = assertThrows(ValidationException.class, new Executable() {
             @Override
             public void execute() throws Throwable {
-                filmStorage.update(filmInvalidDataWithId);
+                filmService.update(filmInvalidDataWithId);
             }
         });
         assertEquals("Дата релиза не может быть раньше 28 декабря 1895 года", exception.getMessage());
@@ -181,11 +183,11 @@ public class FilmStorageTest {
 
     @Test
     void putFilmInvalidDuration() {
-        filmStorage.create(filmStandard);
+        filmService.create(filmStandard);
         final ValidationException exception = assertThrows(ValidationException.class, new Executable() {
             @Override
             public void execute() throws Throwable {
-                filmStorage.update(filmInvalidDurationWithId);
+                filmService.update(filmInvalidDurationWithId);
             }
         });
         assertEquals("Продолжительность фильма должна быть положительной", exception.getMessage());
@@ -196,7 +198,7 @@ public class FilmStorageTest {
         final NotFoundException exception = assertThrows(NotFoundException.class, new Executable() {
             @Override
             public void execute() throws Throwable {
-                filmStorage.update(filmStandard);
+                filmService.update(filmStandard);
             }
         });
         assertEquals("Id не найден, проверьте id", exception.getMessage());

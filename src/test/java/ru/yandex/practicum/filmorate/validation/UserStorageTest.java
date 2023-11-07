@@ -6,6 +6,7 @@ import org.junit.jupiter.api.function.Executable;
 import ru.yandex.practicum.filmorate.exception.NotFoundException;
 import ru.yandex.practicum.filmorate.exception.ValidationException;
 import ru.yandex.practicum.filmorate.model.User;
+import ru.yandex.practicum.filmorate.service.UserService;
 import ru.yandex.practicum.filmorate.storage.InMemoryUserStorage;
 
 import java.time.LocalDate;
@@ -15,7 +16,7 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 
 public class UserStorageTest {
 
-    InMemoryUserStorage userStorage = new InMemoryUserStorage();
+    UserService userService = new UserService(new InMemoryUserStorage());
     User userStandard = new User();
     User userStandardWithId = new User();
     User userInvalidEmail = new User();
@@ -72,14 +73,14 @@ public class UserStorageTest {
 
     @Test
     void getUser() {
-        userStorage.create(userStandard);
-        assertFalse(userStorage.findAll().isEmpty());
-        assertEquals(userStorage.findAll().size(), 1);
+        userService.create(userStandard);
+        assertFalse(userService.findAll().isEmpty());
+        assertEquals(userService.findAll().size(), 1);
     }
 
     @Test
     void postUserStandard() {
-        userStorage.create(userStandard);
+        userService.create(userStandard);
         assertEquals(userStandard.getId(), 1);
     }
 
@@ -88,7 +89,7 @@ public class UserStorageTest {
         final ValidationException exception = assertThrows(ValidationException.class, new Executable() {
             @Override
             public void execute() throws Throwable {
-                userStorage.create(userInvalidEmail);
+                userService.create(userInvalidEmail);
             }
         });
         assertEquals("Неверный формат почты или поле не заполнено", exception.getMessage());
@@ -99,7 +100,7 @@ public class UserStorageTest {
         final ValidationException exception = assertThrows(ValidationException.class, new Executable() {
             @Override
             public void execute() throws Throwable {
-                userStorage.create(userInvalidLogin);
+                userService.create(userInvalidLogin);
             }
         });
         assertEquals("Логин не может быть пустым или содержать пробелы", exception.getMessage());
@@ -110,7 +111,7 @@ public class UserStorageTest {
         final ValidationException exception = assertThrows(ValidationException.class, new Executable() {
             @Override
             public void execute() throws Throwable {
-                userStorage.create(userInvalidBirthday);
+                userService.create(userInvalidBirthday);
             }
         });
         assertEquals("Дата рождения не может быть в будущем", exception.getMessage());
@@ -118,24 +119,24 @@ public class UserStorageTest {
 
     @Test
     void postUserWithoutName() {
-        User user = userStorage.create(userWithoutName);
+        User user = userService.create(userWithoutName);
         assertEquals(user.getName(), user.getLogin());
     }
 
     @Test
     void putUserStandard() {
-        userStorage.create(userStandard);
-        User user = userStorage.update(userStandardWithId);
+        userService.create(userStandard);
+        User user = userService.update(userStandardWithId);
         assertEquals(user.getLogin(), "SeriousSam");
     }
 
     @Test
     void putUserInvalidEmail() {
-        userStorage.create(userStandard);
+        userService.create(userStandard);
         final ValidationException exception = assertThrows(ValidationException.class, new Executable() {
             @Override
             public void execute() throws Throwable {
-                userStorage.update(userInvalidEmailWithId);
+                userService.update(userInvalidEmailWithId);
             }
         });
         assertEquals("Неверный формат почты или поле не заполнено", exception.getMessage());
@@ -143,11 +144,11 @@ public class UserStorageTest {
 
     @Test
     void putUserInvalidLogin() {
-        userStorage.create(userStandard);
+        userService.create(userStandard);
         final ValidationException exception = assertThrows(ValidationException.class, new Executable() {
             @Override
             public void execute() throws Throwable {
-                userStorage.update(userInvalidLoginWithId);
+                userService.update(userInvalidLoginWithId);
             }
         });
         assertEquals("Логин не может быть пустым или содержать пробелы", exception.getMessage());
@@ -155,11 +156,11 @@ public class UserStorageTest {
 
     @Test
     void putUserInvalidBirthday() {
-        userStorage.create(userStandard);
+        userService.create(userStandard);
         final ValidationException exception = assertThrows(ValidationException.class, new Executable() {
             @Override
             public void execute() throws Throwable {
-                userStorage.update(userInvalidBirthdayWithId);
+                userService.update(userInvalidBirthdayWithId);
             }
         });
         assertEquals("Дата рождения не может быть в будущем", exception.getMessage());
@@ -170,7 +171,7 @@ public class UserStorageTest {
         final NotFoundException exception = assertThrows(NotFoundException.class, new Executable() {
             @Override
             public void execute() throws Throwable {
-                userStorage.update(userStandard);
+                userService.update(userStandard);
             }
         });
         assertEquals("Id не найден, проверьте id", exception.getMessage());
