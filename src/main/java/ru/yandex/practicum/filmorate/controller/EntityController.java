@@ -2,46 +2,40 @@ package ru.yandex.practicum.filmorate.controller;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
-import ru.yandex.practicum.filmorate.exception.ValidationException;
 import ru.yandex.practicum.filmorate.model.Entity;
+import ru.yandex.practicum.filmorate.service.EntityService;
 
-import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
 
 @RestController
-public abstract class EntityController<T extends Entity> {
-    protected Map<Integer, T> storage = new HashMap<>();
+public abstract class EntityController<T extends Entity, K extends EntityService> {
     protected Logger log = LoggerFactory.getLogger(Entity.class);
-    protected int id = 1;
+    protected K entityService;
+
+    @Autowired
+    public EntityController(K entityService) {
+        this.entityService = entityService;
+    }
 
     @GetMapping
     public List<T> findAll() {
-        log.info("Выполнен запрос на получение списка");
-        return new ArrayList<>(storage.values());
+        return entityService.findAll();
+    }
+
+    @GetMapping("/{id}")
+    public T findById(@PathVariable("id") int id) {
+        return (T) entityService.findById(id);
     }
 
     @PostMapping
     public T create(@RequestBody T entity) {
-        validate(entity);
-        entity.setId(id);
-        storage.put(id, entity);
-        id++;
-        return entity;
+        return (T) entityService.create(entity);
     }
 
     @PutMapping
     public T update(@RequestBody T entity) {
-        if (!storage.containsKey(entity.getId())) {
-            log.info("Не найден id: {}", entity.getId());
-            throw new ValidationException("Id не найден, проверьте id");
-        }
-        validate(entity);
-        storage.put(entity.getId(), entity);
-        return entity;
+        return (T) entityService.update(entity);
     }
-
-    abstract void validate(T entity);
 }
