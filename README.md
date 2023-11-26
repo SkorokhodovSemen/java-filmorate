@@ -1,7 +1,7 @@
 # java-filmorate
 Template repository for Filmorate project.
 # Data Base
-![DB](https://github.com/SkorokhodovSemen/java-filmorate/assets/80544964/e8d925b3-b576-41f2-8035-81e6311abc33)
+![DB](https://github.com/SkorokhodovSemen/java-filmorate/assets/80544964/50b15cd9-67c2-46a9-a45e-a92684280d0a)
 # Example
 1. Запрос на получение всех фильмов:  
 SELECT *  
