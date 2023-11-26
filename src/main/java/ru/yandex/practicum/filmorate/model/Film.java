@@ -3,26 +3,20 @@ package ru.yandex.practicum.filmorate.model;
 import lombok.Data;
 
 import java.time.LocalDate;
-import java.util.HashSet;
 import java.util.Set;
+import java.util.TreeSet;
 
 @Data
-public class Film extends Entity {
+public class Film {
+    private int id;
     private String name;
     private String description;
     private LocalDate releaseDate;
     private long duration;
-    private Set<Integer> likes = new HashSet<>();
     private int rate = 0;
-
-    public void addLikes(int id) {
-        likes.add(id);
-        rate = likes.size();
-    }
-
-    public void deleteLikes(int id) {
-        likes.remove(id);
-        rate = likes.size();
-    }
-
+    private Set<Genre> genres = new TreeSet<>((genre1, genre2) -> {
+        if (genre1.getId() < genre2.getId()) return -1;
+        else return 1;
+    });
+    private Mpa mpa;
 }

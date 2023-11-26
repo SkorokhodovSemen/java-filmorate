@@ -1,0 +1,11 @@
+INSERT INTO genre (genre) VALUES ('Комедия');
+INSERT INTO genre (genre) VALUES ('Драма');
+INSERT INTO genre (genre) VALUES ('Мультфильм');
+INSERT INTO genre (genre) VALUES ('Триллер');
+INSERT INTO genre (genre) VALUES ('Документальный');
+INSERT INTO genre (genre) VALUES ('Боевик');
+INSERT INTO mpa (rate) VALUES ('G');
+INSERT INTO mpa (rate) VALUES ('PG');
+INSERT INTO mpa (rate) VALUES ('PG-13');
+INSERT INTO mpa (rate) VALUES ('R');
+INSERT INTO mpa (rate) VALUES ('NC-17');
