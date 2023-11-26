@@ -32,8 +32,7 @@ public class MpaServiceDao {
 
     private void validFound(int idMpa) {
         SqlRowSet userRows = jdbcTemplate.queryForRowSet("select * from mpa where id = ?", idMpa);
-        if (userRows.next()) {
-        } else {
+        if (!userRows.next()) {
             throw new NotFoundException("id " + idMpa + " не найден");
         }
     }

@@ -92,8 +92,7 @@ public class UserServiceDao {
 
     private void validFound(int idUser) {
         SqlRowSet userRows = jdbcTemplate.queryForRowSet("select * from user_filmorate where user_id = ?", idUser);
-        if (userRows.next()) {
-        } else {
+        if (!userRows.next()) {
             throw new NotFoundException("id " + idUser + " не найден");
         }
     }

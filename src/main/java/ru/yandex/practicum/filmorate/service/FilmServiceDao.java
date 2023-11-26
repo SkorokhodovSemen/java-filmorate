@@ -103,24 +103,21 @@ public class FilmServiceDao {
 
     private void validFound(int idFilm) {
         SqlRowSet userRows = jdbcTemplate.queryForRowSet("select * from film where film_id = ?", idFilm);
-        if (userRows.next()) {
-        } else {
+        if (!userRows.next()) {
             throw new NotFoundException("id " + idFilm + " не найден");
         }
     }
 
     private void validFoundForUser(int idUser) {
         SqlRowSet userRows = jdbcTemplate.queryForRowSet("select * from user_filmorate where user_id = ?", idUser);
-        if (userRows.next()) {
-        } else {
+        if (!userRows.next()) {
             throw new NotFoundException("id " + idUser + " не найден");
         }
     }
 
     private void validFoundForGenre(int idGenre) {
         SqlRowSet userRows = jdbcTemplate.queryForRowSet("select * from genre where id = ?", idGenre);
-        if (userRows.next()) {
-        } else {
+        if (!userRows.next()) {
             throw new NotFoundException("id " + idGenre + " не найден");
         }
     }

@@ -132,8 +132,7 @@ public class FilmDbStorage implements FilmStorageDao {
 
     private void validFound(int idFilm) {
         SqlRowSet filmRows = jdbcTemplate.queryForRowSet("select * from film where film_id = ?", idFilm);
-        if (filmRows.next()) {
-        } else {
+        if (!filmRows.next()) {
             throw new NotFoundException("id " + idFilm + " не найден");
         }
     }

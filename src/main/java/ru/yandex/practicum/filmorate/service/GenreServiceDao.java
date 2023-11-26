@@ -33,8 +33,7 @@ public class GenreServiceDao {
 
     private void validFound(int idGenre) {
         SqlRowSet userRows = jdbcTemplate.queryForRowSet("select * from genre where id = ?", idGenre);
-        if (userRows.next()) {
-        } else {
+        if (!userRows.next()) {
             throw new NotFoundException("id " + idGenre + " не найден");
         }
     }
