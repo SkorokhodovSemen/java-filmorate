@@ -6,6 +6,7 @@ import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.jdbc.JdbcTest;
 import org.springframework.jdbc.core.JdbcTemplate;
+import org.springframework.test.annotation.DirtiesContext;
 import ru.yandex.practicum.filmorate.dbstorage.*;
 import ru.yandex.practicum.filmorate.dbstorage.dao.*;
 import ru.yandex.practicum.filmorate.model.Film;
@@ -22,6 +23,7 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 
 @JdbcTest
 @RequiredArgsConstructor(onConstructor_ = @Autowired)
+@DirtiesContext(classMode = DirtiesContext.ClassMode.AFTER_EACH_TEST_METHOD)
 public class FilmDbStorageTest {
     private final JdbcTemplate jdbcTemplate;
     Film film = new Film();
@@ -115,9 +117,6 @@ public class FilmDbStorageTest {
         FilmDbStorage filmDbStorage = new FilmDbStorage(jdbcTemplate, filmGenreStorageDao);
         filmDbStorage.create(film);
         filmDbStorage.update(filmUpdateWithRate);
-        System.out.println();
-        System.out.println(filmDbStorage.findById(1));
-        System.out.println();
         assertEquals(filmDbStorage.findById(1).getName(), "Film");
     }
 
@@ -157,16 +156,5 @@ public class FilmDbStorageTest {
         filmStorageDao.create(film);
         filmLikesStorageDao.addLikes(1, 1);
         filmLikesStorageDao.deleteLike(1, 1);
-    }
-
-    @Test
-    public void testCheckGenre() {
-        FilmGenreStorageDao filmGenreStorageDao = new FilmGenreDbStorage(jdbcTemplate);
-        FilmDbStorage filmDbStorage = new FilmDbStorage(jdbcTemplate, filmGenreStorageDao);
-        filmDbStorage.create(film);
-        filmDbStorage.update(filmWithManyGenre);
-        System.out.println();
-        System.out.println(filmDbStorage.findById(1));
-        System.out.println();
     }
 }
