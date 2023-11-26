@@ -60,6 +60,8 @@ public class FilmDbStorage implements FilmStorageDao {
             return statement;
         }, keyHolder);
         if (!film.getGenres().isEmpty()) {
+            String sqlForClearGenre = "delete from film_genre where id_film = ?";
+            jdbcTemplate.update(sqlForClearGenre, film.getId());
             for (Genre genre : film.getGenres()) {
                 filmGenreStorageDao.addFilm(keyHolder.getKey().intValue(), genre.getId());
             }

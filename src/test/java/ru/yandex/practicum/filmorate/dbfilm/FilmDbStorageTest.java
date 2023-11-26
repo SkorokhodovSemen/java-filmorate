@@ -18,6 +18,7 @@ import java.time.LocalDate;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
+import java.util.TreeSet;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
@@ -27,6 +28,10 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 public class FilmDbStorageTest {
     private final JdbcTemplate jdbcTemplate;
     Film film = new Film();
+    Film filmPostman = new Film();
+    Film filmPostmanUpdate = new Film();
+    Film newPostmanFilm = new Film();
+    Film updatePostman = new Film();
     Film updateFilm = new Film();
     Film filmWithRate = new Film();
     Film filmUpdateWithRate = new Film();
@@ -37,7 +42,28 @@ public class FilmDbStorageTest {
     public void beforeEach() {
         Mpa mpa = new Mpa();
         mpa.setId(1);
-        Set<Genre> genre = new HashSet<>();
+        Mpa mpa2 = new Mpa();
+        mpa.setId(2);
+        Mpa mpa3 = new Mpa();
+        mpa.setId(3);
+        Set<Genre> genre11 = new TreeSet<>((genre1, genre2) -> {
+            if (genre1.getId() < genre2.getId()) return -1;
+            else return 1;
+        });
+        Genre genre12 = new Genre();
+        genre12.setId(1);
+        genre11.add(genre12);
+        Set<Genre> genre13 = new TreeSet<>((genre1, genre2) -> {
+            if (genre1.getId() < genre2.getId()) return -1;
+            else return 1;
+        });
+        Genre genre14 = new Genre();
+        genre14.setId(2);
+        genre13.add(genre14);
+        Set<Genre> genre = new TreeSet<>((genre1, genre2) -> {
+            if (genre1.getId() < genre2.getId()) return -1;
+            else return 1;
+        });
         Genre genre1 = new Genre();
         Genre genre2 = new Genre();
         Genre genre3 = new Genre();
@@ -47,6 +73,33 @@ public class FilmDbStorageTest {
         genre.add(genre1);
         genre.add(genre2);
         genre.add(genre3);
+        filmPostman.setName("nisi eiusmod");
+        filmPostman.setDescription("adipisicing");
+        filmPostman.setReleaseDate(LocalDate.of(1967, 03, 25));
+        filmPostman.setDuration(100);
+        filmPostman.setMpa(mpa);
+        filmPostmanUpdate.setId(1);
+        filmPostmanUpdate.setName("Film update");
+        filmPostmanUpdate.setDescription("adipisicing");
+        filmPostmanUpdate.setReleaseDate(LocalDate.of(1989, 4, 17));
+        filmPostmanUpdate.setDuration(190);
+        filmPostmanUpdate.setMpa(mpa);
+        filmPostmanUpdate.setRate(4);
+        newPostmanFilm.setName("New film");
+        newPostmanFilm.setDescription("New film about friends");
+        newPostmanFilm.setReleaseDate(LocalDate.of(1999, 4, 30));
+        newPostmanFilm.setDuration(120);
+        newPostmanFilm.setMpa(mpa);
+        newPostmanFilm.setRate(4);
+        newPostmanFilm.setGenres(genre11);
+        updatePostman.setId(1);
+        updatePostman.setName("Film updated");
+        updatePostman.setDescription("New film description");
+        updatePostman.setReleaseDate(LocalDate.of(1989, 4, 17));
+        updatePostman.setDuration(190);
+        updatePostman.setMpa(mpa);
+        updatePostman.setRate(4);
+        updatePostman.setGenres(genre13);
         film.setName("Фильм");
         film.setDuration(100);
         film.setDescription("Хороший фильм");
@@ -156,5 +209,18 @@ public class FilmDbStorageTest {
         filmStorageDao.create(film);
         filmLikesStorageDao.addLikes(1, 1);
         filmLikesStorageDao.deleteLike(1, 1);
+    }
+
+    @Test
+    public void checkPostmanTest() {
+        FilmGenreStorageDao filmGenreStorageDao = new FilmGenreDbStorage(jdbcTemplate);
+        FilmDbStorage filmDbStorage = new FilmDbStorage(jdbcTemplate, filmGenreStorageDao);
+        filmDbStorage.create(filmPostman);
+        filmDbStorage.update(filmPostmanUpdate);
+        filmDbStorage.create(newPostmanFilm);
+        filmDbStorage.update(updatePostman);
+        System.out.println();
+        System.out.println(filmDbStorage.findAll());
+        System.out.println();
     }
 }
