@@ -11,12 +11,12 @@ import ru.yandex.practicum.filmorate.model.Mpa;
 import java.util.List;
 
 @Service
-public class MpaServiceDao {
+public class MpaService {
     private final MpaDbStorage mpaDbStorage;
     private final JdbcTemplate jdbcTemplate;
 
     @Autowired
-    public MpaServiceDao(MpaDbStorage mpaDbStorage, JdbcTemplate jdbcTemplate) {
+    public MpaService(MpaDbStorage mpaDbStorage, JdbcTemplate jdbcTemplate) {
         this.mpaDbStorage = mpaDbStorage;
         this.jdbcTemplate = jdbcTemplate;
     }

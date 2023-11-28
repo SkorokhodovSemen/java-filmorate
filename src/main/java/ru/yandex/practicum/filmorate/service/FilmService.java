@@ -13,13 +13,12 @@ import ru.yandex.practicum.filmorate.dbstorage.UserDbStorage;
 import ru.yandex.practicum.filmorate.exception.NotFoundException;
 import ru.yandex.practicum.filmorate.exception.ValidationException;
 import ru.yandex.practicum.filmorate.model.Film;
-import ru.yandex.practicum.filmorate.model.Genre;
 
 import java.time.LocalDate;
 import java.util.List;
 
 @Service
-public class FilmServiceDao {
+public class FilmService {
     private static final int MAX_SYMBOLS = 200;
     private static final LocalDate RELEASE_DATA = LocalDate.of(1895, 12, 28);
     private final FilmDbStorage filmDbStorage;
@@ -27,10 +26,10 @@ public class FilmServiceDao {
     private final FilmLikesDbStorage filmLikesDbStorage;
     private final FilmGenreDbStorage filmGenreDbStorage;
     private final JdbcTemplate jdbcTemplate;
-    private Logger log = LoggerFactory.getLogger(FilmServiceDao.class);
+    private Logger log = LoggerFactory.getLogger(FilmService.class);
 
     @Autowired
-    public FilmServiceDao(FilmDbStorage filmDbStorage, UserDbStorage userDbStorage, FilmLikesDbStorage filmLikesDbStorage, FilmGenreDbStorage filmGenreDbStorage, JdbcTemplate jdbcTemplate) {
+    public FilmService(FilmDbStorage filmDbStorage, UserDbStorage userDbStorage, FilmLikesDbStorage filmLikesDbStorage, FilmGenreDbStorage filmGenreDbStorage, JdbcTemplate jdbcTemplate) {
         this.filmDbStorage = filmDbStorage;
         this.userDbStorage = userDbStorage;
         this.filmLikesDbStorage = filmLikesDbStorage;
@@ -49,12 +48,9 @@ public class FilmServiceDao {
 
     public Film create(Film film) {
         validate(film);
-        Film filmSaved = filmDbStorage.create(film);
+        Film filmSaved = filmDbStorage.findById(filmDbStorage.create(film));
         if (!filmSaved.getGenres().isEmpty()) {
-            for (Genre genre : filmSaved.getGenres()) {
-                validFoundForGenre(genre.getId());
-                filmGenreDbStorage.addFilm(filmSaved.getId(), genre.getId());
-            }
+            filmGenreDbStorage.addFilm(filmSaved);
         }
         return filmSaved;
     }
@@ -62,7 +58,7 @@ public class FilmServiceDao {
     public Film update(Film film) {
         validFound(film.getId());
         validate(film);
-        return filmDbStorage.update(film);
+        return filmDbStorage.findById(filmDbStorage.update(film));
     }
 
     public List<Film> getPopularFilms(int count) {
@@ -112,13 +108,6 @@ public class FilmServiceDao {
         SqlRowSet userRows = jdbcTemplate.queryForRowSet("select * from user_filmorate where user_id = ?", idUser);
         if (!userRows.next()) {
             throw new NotFoundException("id " + idUser + " не найден");
-        }
-    }
-
-    private void validFoundForGenre(int idGenre) {
-        SqlRowSet userRows = jdbcTemplate.queryForRowSet("select * from genre where id = ?", idGenre);
-        if (!userRows.next()) {
-            throw new NotFoundException("id " + idGenre + " не найден");
         }
     }
 }

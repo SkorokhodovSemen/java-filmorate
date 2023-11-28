@@ -70,7 +70,7 @@ class UserDbStorageTest {
     @Test
     public void testAddFriendAndFindAllFriendsAndDeleteFriends() {
         UserStorageDao userStorageDao = new UserDbStorage(jdbcTemplate);
-        UserRelationshipStorageDao userRelationshipStorageDao = new UserRelationshipDbStorage(jdbcTemplate, userStorageDao);
+        UserRelationshipStorageDao userRelationshipStorageDao = new UserRelationshipDbStorage(jdbcTemplate);
         userStorageDao.create(user);
         userStorageDao.create(user);
         userStorageDao.create(userUpdate);
@@ -86,7 +86,7 @@ class UserDbStorageTest {
     @Test
     public void testGetCommonFriends() {
         UserStorageDao userStorageDao = new UserDbStorage(jdbcTemplate);
-        UserRelationshipStorageDao userRelationshipStorageDao = new UserRelationshipDbStorage(jdbcTemplate, userStorageDao);
+        UserRelationshipStorageDao userRelationshipStorageDao = new UserRelationshipDbStorage(jdbcTemplate);
         userStorageDao.create(user);
         userStorageDao.create(user);
         userStorageDao.create(userUpdate);
@@ -99,5 +99,6 @@ class UserDbStorageTest {
         List<User> commonFriends = userRelationshipStorageDao.getCommonFriends(1, 2);
         assertEquals(commonFriends.size(), 2);
         assertEquals(commonFriends.get(0).getId(), 3);
+        userRelationshipStorageDao.getAllFriends(1);
     }
 }

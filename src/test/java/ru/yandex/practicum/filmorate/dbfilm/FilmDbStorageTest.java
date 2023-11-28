@@ -140,8 +140,7 @@ public class FilmDbStorageTest {
 
     @Test
     public void testFindFilmById() {
-        FilmGenreStorageDao filmGenreStorageDao = new FilmGenreDbStorage(jdbcTemplate);
-        FilmDbStorage filmDbStorage = new FilmDbStorage(jdbcTemplate, filmGenreStorageDao);
+        FilmDbStorage filmDbStorage = new FilmDbStorage(jdbcTemplate);
         filmDbStorage.create(film);
         filmDbStorage.create(filmWithRate);
         System.out.println();
@@ -153,8 +152,7 @@ public class FilmDbStorageTest {
 
     @Test
     public void testFindAllFilms() {
-        FilmGenreStorageDao filmGenreStorageDao = new FilmGenreDbStorage(jdbcTemplate);
-        FilmDbStorage filmDbStorage = new FilmDbStorage(jdbcTemplate, filmGenreStorageDao);
+        FilmDbStorage filmDbStorage = new FilmDbStorage(jdbcTemplate);
         filmDbStorage.create(film);
         filmDbStorage.create(film);
         filmDbStorage.create(film);
@@ -165,8 +163,7 @@ public class FilmDbStorageTest {
 
     @Test
     public void testUpdateFilm() {
-        FilmGenreStorageDao filmGenreStorageDao = new FilmGenreDbStorage(jdbcTemplate);
-        FilmDbStorage filmDbStorage = new FilmDbStorage(jdbcTemplate, filmGenreStorageDao);
+        FilmDbStorage filmDbStorage = new FilmDbStorage(jdbcTemplate);
         filmDbStorage.create(film);
         filmDbStorage.update(filmUpdateWithRate);
         assertEquals(filmDbStorage.findById(1).getName(), "Film");
@@ -174,9 +171,8 @@ public class FilmDbStorageTest {
 
     @Test
     public void testAddLikesAndDeleteLikesAndPopularsFilm() {
-        FilmGenreStorageDao filmGenreStorageDao = new FilmGenreDbStorage(jdbcTemplate);
         UserStorageDao userStorageDao = new UserDbStorage(jdbcTemplate);
-        FilmStorageDao filmStorageDao = new FilmDbStorage(jdbcTemplate, filmGenreStorageDao);
+        FilmStorageDao filmStorageDao = new FilmDbStorage(jdbcTemplate);
         FilmLikesStorageDao filmLikesStorageDao = new FilmLikesDbStorage(jdbcTemplate, filmStorageDao);
         userStorageDao.create(user);
         userStorageDao.create(user);
@@ -200,9 +196,8 @@ public class FilmDbStorageTest {
 
     @Test
     public void testDeleteLikes() {
-        FilmGenreStorageDao filmGenreStorageDao = new FilmGenreDbStorage(jdbcTemplate);
         UserStorageDao userStorageDao = new UserDbStorage(jdbcTemplate);
-        FilmStorageDao filmStorageDao = new FilmDbStorage(jdbcTemplate, filmGenreStorageDao);
+        FilmStorageDao filmStorageDao = new FilmDbStorage(jdbcTemplate);
         FilmLikesStorageDao filmLikesStorageDao = new FilmLikesDbStorage(jdbcTemplate, filmStorageDao);
         userStorageDao.create(user);
         filmStorageDao.create(film);
@@ -212,8 +207,7 @@ public class FilmDbStorageTest {
 
     @Test
     public void checkPostmanTest() {
-        FilmGenreStorageDao filmGenreStorageDao = new FilmGenreDbStorage(jdbcTemplate);
-        FilmDbStorage filmDbStorage = new FilmDbStorage(jdbcTemplate, filmGenreStorageDao);
+        FilmDbStorage filmDbStorage = new FilmDbStorage(jdbcTemplate);
         filmDbStorage.create(filmPostman);
         filmDbStorage.update(filmPostmanUpdate);
         filmDbStorage.create(newPostmanFilm);

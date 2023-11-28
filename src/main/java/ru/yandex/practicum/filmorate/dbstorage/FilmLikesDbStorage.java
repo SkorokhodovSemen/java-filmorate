@@ -1,7 +1,6 @@
 package ru.yandex.practicum.filmorate.dbstorage;
 
 import org.springframework.jdbc.core.JdbcTemplate;
-import org.springframework.jdbc.support.rowset.SqlRowSet;
 import org.springframework.stereotype.Component;
 import ru.yandex.practicum.filmorate.dbstorage.dao.FilmLikesStorageDao;
 import ru.yandex.practicum.filmorate.dbstorage.dao.FilmStorageDao;
@@ -36,8 +35,8 @@ public class FilmLikesDbStorage implements FilmLikesStorageDao {
         String sql = "delete from film_likes " +
                 "where (id_film = ? and id_user = ?)";
         jdbcTemplate.update(sql, idFilm, idUser);
-        String sqlRate = "update film set rate = ? where film_id = ?";
-        jdbcTemplate.update(sqlRate, getLikes(idFilm), idFilm);
+        String sqlRate = "update film set rate = (rate -1) where film_id = ?";
+        jdbcTemplate.update(sqlRate, idFilm);
         return filmStorageDao.findById(idFilm);
     }
 
@@ -49,17 +48,5 @@ public class FilmLikesDbStorage implements FilmLikesStorageDao {
         String sqlRate = "update film set rate = (rate + 1) where film_id = ?";
         jdbcTemplate.update(sqlRate, idFilm);
         return filmStorageDao.findById(idFilm);
-    }
-
-    private Integer getLikes(int idFilm) {
-        SqlRowSet filmRows = jdbcTemplate
-                .queryForRowSet("select count(id_user) from film_likes where id_film = ? group by id_film", idFilm);
-        if (filmRows.next()) {
-            String sql = "select count(id_user) from film_likes where id_film = ? group by id_film";
-            Integer likes = jdbcTemplate.queryForObject(sql, Integer.class, idFilm);
-            return likes;
-        } else {
-            return 0;
-        }
     }
 }

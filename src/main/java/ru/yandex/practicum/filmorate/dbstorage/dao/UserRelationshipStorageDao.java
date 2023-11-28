@@ -5,9 +5,9 @@ import ru.yandex.practicum.filmorate.model.User;
 import java.util.List;
 
 public interface UserRelationshipStorageDao {
-    User addFriend(int idUser1, int idUser2);
+    void addFriend(int idUser1, int idUser2);
 
-    User deleteFriend(int idUser1, int idUser2);
+    void deleteFriend(int idUser1, int idUser2);
 
     List<User> getCommonFriends(int idUser1, int idUser2);
 

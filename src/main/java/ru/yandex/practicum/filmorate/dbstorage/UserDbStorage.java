@@ -39,8 +39,7 @@ public class UserDbStorage implements UserStorageDao {
                 .withTableName("user_filmorate")
                 .usingGeneratedKeyColumns("user_id");
         int key = simpleJdbcInsert.executeAndReturnKey(toMap(user)).intValue();
-        String sql = "select * from user_filmorate where user_id = ?";
-        return jdbcTemplate.queryForObject(sql, this::makeUser, key);
+        return findById(key);
     }
 
     @Override
@@ -54,8 +53,7 @@ public class UserDbStorage implements UserStorageDao {
                 user.getName(),
                 user.getBirthday(),
                 user.getId());
-        String sql = "select * from user_filmorate where user_id = ?";
-        return jdbcTemplate.queryForObject(sql, this::makeUser, user.getId());
+        return findById(user.getId());
     }
 
     public Map<String, Object> toMap(User user) {

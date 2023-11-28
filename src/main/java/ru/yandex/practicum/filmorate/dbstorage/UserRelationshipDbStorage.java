@@ -3,52 +3,66 @@ package ru.yandex.practicum.filmorate.dbstorage;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.stereotype.Component;
 import ru.yandex.practicum.filmorate.dbstorage.dao.UserRelationshipStorageDao;
-import ru.yandex.practicum.filmorate.dbstorage.dao.UserStorageDao;
 import ru.yandex.practicum.filmorate.model.User;
 
+import java.sql.Timestamp;
+import java.util.ArrayList;
 import java.util.List;
-import java.util.stream.Collectors;
+import java.util.Map;
 
 @Component
 public class UserRelationshipDbStorage implements UserRelationshipStorageDao {
     private final JdbcTemplate jdbcTemplate;
-    private final UserStorageDao userStorageDao;
 
-    public UserRelationshipDbStorage(JdbcTemplate jdbcTemplate, UserStorageDao userStorageDao) {
+    public UserRelationshipDbStorage(JdbcTemplate jdbcTemplate) {
         this.jdbcTemplate = jdbcTemplate;
-        this.userStorageDao = userStorageDao;
     }
 
     @Override
-    public User addFriend(int idUser1, int idUser2) {
+    public void addFriend(int idUser1, int idUser2) {
         String sql = "insert into relationship (id, id_friend) values (?, ?)";
         jdbcTemplate.update(sql, idUser1, idUser2);
-        return userStorageDao.findById(idUser1);
     }
 
     @Override
-    public User deleteFriend(int idUser1, int idUser2) {
+    public void deleteFriend(int idUser1, int idUser2) {
         String sql = "delete from relationship where (id = ? and id_friend = ?)";
         jdbcTemplate.update(sql, idUser1, idUser2);
-        return userStorageDao.findById(idUser1);
     }
 
     @Override
     public List<User> getCommonFriends(int idUser1, int idUser2) {
-        String sql = "select id_friend from relationship where id = ? and id_friend in " +
-                "(select id_friend from relationship where id = ?)";
-        List<Integer> friends = jdbcTemplate.queryForList(sql, Integer.class, idUser1, idUser2);
-        return friends.stream()
-                .map(userStorageDao::findById)
-                .collect(Collectors.toList());
+        String sql = "select * from user_filmorate where user_id " +
+                "in (select id_friend from relationship where (id = ? and id_friend " +
+                "in (select id_friend from relationship where id = ?)))";
+        List<Map<String, Object>> results = jdbcTemplate.queryForList(sql, idUser1, idUser2);
+        List<User> friends = new ArrayList<>();
+        for (Map map : results) {
+            User user = new User();
+            user.setId((Integer) map.get("user_id"));
+            user.setEmail((String) map.get("email"));
+            user.setLogin((String) map.get("login"));
+            user.setBirthday(((Timestamp) map.get("birthday")).toLocalDateTime().toLocalDate());
+            user.setName((String) map.get("name"));
+            friends.add(user);
+        }
+        return friends;
     }
 
     @Override
     public List<User> getAllFriends(int idUser) {
-        String sql = "select id_friend from relationship where id = ?";
-        List<Integer> friends = jdbcTemplate.queryForList(sql, Integer.class, idUser);
-        return friends.stream()
-                .map(userStorageDao::findById)
-                .collect(Collectors.toList());
+        String sql = "select * from user_filmorate where user_id in (select id_friend from relationship where id = ?)";
+        List<Map<String, Object>> results = jdbcTemplate.queryForList(sql, idUser);
+        List<User> friends = new ArrayList<>();
+        for (Map map : results) {
+            User user = new User();
+            user.setId((Integer) map.get("user_id"));
+            user.setEmail((String) map.get("email"));
+            user.setLogin((String) map.get("login"));
+            user.setBirthday(((Timestamp) map.get("birthday")).toLocalDateTime().toLocalDate());
+            user.setName((String) map.get("name"));
+            friends.add(user);
+        }
+        return friends;
     }
 }

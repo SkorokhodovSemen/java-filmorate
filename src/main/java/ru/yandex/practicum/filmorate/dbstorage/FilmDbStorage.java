@@ -1,13 +1,11 @@
 package ru.yandex.practicum.filmorate.dbstorage;
 
+import org.springframework.jdbc.core.BatchPreparedStatementSetter;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.jdbc.support.GeneratedKeyHolder;
 import org.springframework.jdbc.support.KeyHolder;
-import org.springframework.jdbc.support.rowset.SqlRowSet;
 import org.springframework.stereotype.Component;
-import ru.yandex.practicum.filmorate.dbstorage.dao.FilmGenreStorageDao;
 import ru.yandex.practicum.filmorate.dbstorage.dao.FilmStorageDao;
-import ru.yandex.practicum.filmorate.exception.NotFoundException;
 import ru.yandex.practicum.filmorate.model.Film;
 import ru.yandex.practicum.filmorate.model.Genre;
 import ru.yandex.practicum.filmorate.model.Mpa;
@@ -16,18 +14,14 @@ import java.sql.Date;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
-import java.util.List;
-import java.util.Set;
-import java.util.TreeSet;
+import java.util.*;
 
 @Component
 public class FilmDbStorage implements FilmStorageDao {
     private final JdbcTemplate jdbcTemplate;
-    private final FilmGenreStorageDao filmGenreStorageDao;
 
-    public FilmDbStorage(JdbcTemplate jdbcTemplate, FilmGenreStorageDao filmGenreStorageDao) {
+    public FilmDbStorage(JdbcTemplate jdbcTemplate) {
         this.jdbcTemplate = jdbcTemplate;
-        this.filmGenreStorageDao = filmGenreStorageDao;
     }
 
 
@@ -39,13 +33,12 @@ public class FilmDbStorage implements FilmStorageDao {
 
     @Override
     public Film findById(int id) {
-        validFound(id);
-        String sql = "select * from film where film_id = ?";
+        String sql = "select * from film as f inner join mpa as m on f.mpa = m.id where f.film_id = ?";
         return jdbcTemplate.queryForObject(sql, this::makeFilm, id);
     }
 
     @Override
-    public Film create(Film film) {
+    public int create(Film film) {
         String sqlQuery = "insert into film (name, description, release_data, duration, mpa, rate) " +
                 "values (?, ?, ?, ?, ?, ?)";
         KeyHolder keyHolder = new GeneratedKeyHolder();
@@ -60,19 +53,26 @@ public class FilmDbStorage implements FilmStorageDao {
             return statement;
         }, keyHolder);
         if (!film.getGenres().isEmpty()) {
-            String sqlForClearGenre = "delete from film_genre where id_film = ?";
-            jdbcTemplate.update(sqlForClearGenre, film.getId());
-            for (Genre genre : film.getGenres()) {
-                filmGenreStorageDao.addFilm(keyHolder.getKey().intValue(), genre.getId());
-            }
+            List<Genre> genres = new ArrayList<>(film.getGenres());
+            jdbcTemplate.batchUpdate("insert into film_genre (id_film, genre_id) values (?, ?)",
+                    new BatchPreparedStatementSetter() {
+                        @Override
+                        public void setValues(PreparedStatement ps, int i) throws SQLException {
+                            ps.setInt(1, keyHolder.getKey().intValue());
+                            ps.setInt(2, genres.get(i).getId());
+                        }
+
+                        @Override
+                        public int getBatchSize() {
+                            return genres.size();
+                        }
+                    });
         }
-        String sql = "select * from film where film_id = ?";
-        return jdbcTemplate.queryForObject(sql, this::makeFilm, keyHolder.getKey().intValue());
+        return keyHolder.getKey().intValue();
     }
 
     @Override
-    public Film update(Film film) {
-        validFound(film.getId());
+    public int update(Film film) {
         String sqlQuery = "update film set " +
                 "name = ?, description = ?, release_data = ?, duration = ?, mpa = ? , rate = ?" +
                 "where film_id = ?";
@@ -85,39 +85,45 @@ public class FilmDbStorage implements FilmStorageDao {
                 film.getRate(),
                 film.getId());
         if (!film.getGenres().isEmpty()) {
-            String sqlForClearGenre = "delete from film_genre where id_film = ?";
-            jdbcTemplate.update(sqlForClearGenre, film.getId());
-            for (Genre genre : film.getGenres()) {
-                filmGenreStorageDao.addFilm(film.getId(), genre.getId());
-            }
+            List<Genre> genres = new ArrayList<>(film.getGenres());
+            jdbcTemplate.batchUpdate("insert into film_genre (id_film, genre_id) values (?, ?)",
+                    new BatchPreparedStatementSetter() {
+                        @Override
+                        public void setValues(PreparedStatement ps, int i) throws SQLException {
+                            ps.setInt(1, film.getId());
+                            ps.setInt(2, genres.get(i).getId());
+                        }
+
+                        @Override
+                        public int getBatchSize() {
+                            return genres.size();
+                        }
+                    });
         } else {
-            filmGenreStorageDao.deleteFilm(film.getId());
+            String sqlForGenre = "delete from film_genre where id_film = ?";
+            jdbcTemplate.update(sqlForGenre, film.getId());
         }
-        String sql = "select * from film where film_id = ?";
-        return jdbcTemplate.queryForObject(sql, this::makeFilm, film.getId());
+        return film.getId();
     }
 
     private Film makeFilm(ResultSet rs, int rowNum) throws SQLException {
         Film film = new Film();
         Mpa mpa = new Mpa();
         mpa.setId(rs.getInt("mpa"));
-        String sqlForMpa = "select rate from mpa where id = ?";
-        mpa.setName(jdbcTemplate.queryForObject(sqlForMpa, String.class, mpa.getId()));
+        mpa.setName(rs.getString("rate"));
         Set<Genre> genres = new TreeSet<>((genre1, genre2) -> {
             if (genre1.getId() < genre2.getId()) return -1;
             else return 1;
         });
-        SqlRowSet filmRows = jdbcTemplate
-                .queryForRowSet("select * from film_genre where id_film = ?", rs.getInt("film_id"));
-        if (filmRows.next()) {
-            String sql = "select genre_id from film_genre where id_film = ?";
-            List<Integer> idList = jdbcTemplate.queryForList(sql, Integer.class, rs.getInt("film_id"));
-            for (Integer id : idList) {
-                String sqlForFilmGenre = "select genre from genre where id = ?";
-                String genreName = jdbcTemplate.queryForObject(sqlForFilmGenre, String.class, id);
+        String sql = "select fg.genre_id, g.genre from film_genre as fg " +
+                "inner join genre as g on g.id = fg.genre_id " +
+                "where fg.id_film = ?";
+        List<Map<String, Object>> result = jdbcTemplate.queryForList(sql, rs.getInt("film_id"));
+        if (result != null) {
+            for (Map<String, Object> map : result) {
                 Genre savedGenre = new Genre();
-                savedGenre.setId(id);
-                savedGenre.setName(genreName);
+                savedGenre.setId((Integer) map.get("genre_id"));
+                savedGenre.setName((String) map.get("genre"));
                 genres.add(savedGenre);
             }
         }
@@ -130,12 +136,5 @@ public class FilmDbStorage implements FilmStorageDao {
         film.setRate(rs.getInt("rate"));
         film.setGenres(genres);
         return film;
-    }
-
-    private void validFound(int idFilm) {
-        SqlRowSet filmRows = jdbcTemplate.queryForRowSet("select * from film where film_id = ?", idFilm);
-        if (!filmRows.next()) {
-            throw new NotFoundException("id " + idFilm + " не найден");
-        }
     }
 }

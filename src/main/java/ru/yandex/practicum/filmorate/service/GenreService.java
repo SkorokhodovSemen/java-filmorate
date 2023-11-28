@@ -11,12 +11,12 @@ import ru.yandex.practicum.filmorate.model.Genre;
 import java.util.List;
 
 @Service
-public class GenreServiceDao {
+public class GenreService {
     private final GenreDbStorage genreDbStorage;
     private final JdbcTemplate jdbcTemplate;
 
     @Autowired
-    public GenreServiceDao(GenreDbStorage genreDbStorage, JdbcTemplate jdbcTemplate) {
+    public GenreService(GenreDbStorage genreDbStorage, JdbcTemplate jdbcTemplate) {
         this.genreDbStorage = genreDbStorage;
         this.jdbcTemplate = jdbcTemplate;
     }

@@ -16,14 +16,14 @@ import java.time.LocalDate;
 import java.util.List;
 
 @Service
-public class UserServiceDao {
-    protected Logger log = LoggerFactory.getLogger(UserServiceDao.class);
+public class UserService {
+    protected Logger log = LoggerFactory.getLogger(UserService.class);
     private final UserDbStorage userDbStorage;
     private final JdbcTemplate jdbcTemplate;
     private final UserRelationshipDbStorage userRelationshipDbStorage;
 
     @Autowired
-    public UserServiceDao(UserDbStorage userDbStorage, JdbcTemplate jdbcTemplate, UserRelationshipDbStorage userRelationshipDbStorage) {
+    public UserService(UserDbStorage userDbStorage, JdbcTemplate jdbcTemplate, UserRelationshipDbStorage userRelationshipDbStorage) {
         this.userDbStorage = userDbStorage;
         this.jdbcTemplate = jdbcTemplate;
         this.userRelationshipDbStorage = userRelationshipDbStorage;
@@ -49,16 +49,16 @@ public class UserServiceDao {
         return userDbStorage.update(user);
     }
 
-    public User addFriend(int idUser1, int idUser2) {
+    public void addFriend(int idUser1, int idUser2) {
         validFound(idUser1);
         validFound(idUser2);
-        return userRelationshipDbStorage.addFriend(idUser1, idUser2);
+        userRelationshipDbStorage.addFriend(idUser1, idUser2);
     }
 
-    public User deleteFriend(int idUser1, int idUser2) {
+    public void deleteFriend(int idUser1, int idUser2) {
         validFound(idUser1);
         validFound(idUser2);
-        return userRelationshipDbStorage.deleteFriend(idUser1, idUser2);
+        userRelationshipDbStorage.deleteFriend(idUser1, idUser2);
     }
 
     public List<User> getCommonFriends(int idUser1, int idUser2) {

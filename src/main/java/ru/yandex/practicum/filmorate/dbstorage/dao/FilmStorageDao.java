@@ -9,7 +9,7 @@ public interface FilmStorageDao {
 
     Film findById(int id);
 
-    Film create(Film entity);
+    int create(Film entity);
 
-    Film update(Film entity);
+    int update(Film entity);
 }
