@@ -85,6 +85,8 @@ public class FilmDbStorage implements FilmStorageDao {
                 film.getRate(),
                 film.getId());
         if (!film.getGenres().isEmpty()) {
+            String sqlDelete = "delete from film_genre where id_film = ?";
+            jdbcTemplate.update(sqlDelete,film.getId());
             List<Genre> genres = new ArrayList<>(film.getGenres());
             jdbcTemplate.batchUpdate("insert into film_genre (id_film, genre_id) values (?, ?)",
                     new BatchPreparedStatementSetter() {
@@ -110,7 +112,7 @@ public class FilmDbStorage implements FilmStorageDao {
         Film film = new Film();
         Mpa mpa = new Mpa();
         mpa.setId(rs.getInt("mpa"));
-        mpa.setName(rs.getString("rate"));
+        mpa.setName(rs.getString("name_rate"));
         Set<Genre> genres = new TreeSet<>((genre1, genre2) -> {
             if (genre1.getId() < genre2.getId()) return -1;
             else return 1;
