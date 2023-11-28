@@ -27,7 +27,7 @@ public class FilmDbStorage implements FilmStorageDao {
 
     @Override
     public List findAll() {
-        String sql = "select * from film";
+        String sql = "select * from film as f inner join mpa as m on f.mpa = m.id";
         return jdbcTemplate.query(sql, this::makeFilm);
     }
 
