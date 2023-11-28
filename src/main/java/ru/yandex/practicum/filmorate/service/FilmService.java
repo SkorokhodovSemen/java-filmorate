@@ -49,9 +49,6 @@ public class FilmService {
     public Film create(Film film) {
         validate(film);
         Film filmSaved = filmDbStorage.findById(filmDbStorage.create(film));
-        if (!filmSaved.getGenres().isEmpty()) {
-            filmGenreDbStorage.addFilm(filmSaved);
-        }
         return filmSaved;
     }
 
