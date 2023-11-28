@@ -32,7 +32,7 @@ public class MpaDbStorage implements MpaStorageDao {
     private Mpa makeMpa(ResultSet rs, int rowNum) throws SQLException {
         Mpa mpa = new Mpa();
         mpa.setId(rs.getInt("id"));
-        mpa.setName(rs.getString("rate"));
+        mpa.setName(rs.getString("name_rate"));
         return mpa;
     }
 }
