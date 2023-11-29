@@ -7,6 +7,7 @@ import org.springframework.web.bind.annotation.*;
 import ru.yandex.practicum.filmorate.model.Film;
 import ru.yandex.practicum.filmorate.service.FilmService;
 
+import java.sql.SQLException;
 import java.util.List;
 
 @RestController
@@ -45,15 +46,15 @@ public class FilmController {
     }
 
     @PutMapping("/{id}/like/{userId}")
-    public Film addLikes(@PathVariable("id") int id, @PathVariable("userId") int userId) {
+    public void addLikes(@PathVariable("id") int id, @PathVariable("userId") int userId) {
         log.info("Получен запрос на добавление лайка для фильма с id {} от пользователя с id {}", id, userId);
-        return filmService.addLikes(id, userId);
+        filmService.addLikes(id, userId);
     }
 
     @DeleteMapping("{id}/like/{userId}")
-    public Film deleteLike(@PathVariable("id") int id, @PathVariable("userId") int userId) {
+    public void deleteLike(@PathVariable("id") int id, @PathVariable("userId") int userId) {
         log.info("Получен запрос на удаление лайка для фильма с id {} от пользователя с id {}", id, userId);
-        return filmService.deleteLike(id, userId);
+        filmService.deleteLike(id, userId);
     }
 
     @GetMapping("/popular")

@@ -26,15 +26,15 @@ public class FilmDbStorage implements FilmStorageDao {
 
 
     @Override
-    public List findAll() {
+    public List<Film> findAll() {
         String sql = "select * from film as f inner join mpa as m on f.mpa = m.id";
-        return jdbcTemplate.query(sql, this::makeFilm);
+        return jdbcTemplate.query(sql, FilmDbStorage::makeFilm);
     }
 
     @Override
     public Film findById(int id) {
         String sql = "select * from film as f inner join mpa as m on f.mpa = m.id where f.film_id = ?";
-        return jdbcTemplate.queryForObject(sql, this::makeFilm, id);
+        return jdbcTemplate.queryForObject(sql, FilmDbStorage::makeFilm, id);
     }
 
     @Override
@@ -54,19 +54,7 @@ public class FilmDbStorage implements FilmStorageDao {
         }, keyHolder);
         if (!film.getGenres().isEmpty()) {
             List<Genre> genres = new ArrayList<>(film.getGenres());
-            jdbcTemplate.batchUpdate("insert into film_genre (id_film, genre_id) values (?, ?)",
-                    new BatchPreparedStatementSetter() {
-                        @Override
-                        public void setValues(PreparedStatement ps, int i) throws SQLException {
-                            ps.setInt(1, keyHolder.getKey().intValue());
-                            ps.setInt(2, genres.get(i).getId());
-                        }
-
-                        @Override
-                        public int getBatchSize() {
-                            return genres.size();
-                        }
-                    });
+            saveFilmGenre(keyHolder.getKey().intValue(), genres);
         }
         return keyHolder.getKey().intValue();
     }
@@ -84,51 +72,20 @@ public class FilmDbStorage implements FilmStorageDao {
                 film.getMpa().getId(),
                 film.getRate(),
                 film.getId());
+        String sqlDelete = "delete from film_genre where id_film = ?";
+        jdbcTemplate.update(sqlDelete, film.getId());
         if (!film.getGenres().isEmpty()) {
-            String sqlDelete = "delete from film_genre where id_film = ?";
-            jdbcTemplate.update(sqlDelete,film.getId());
             List<Genre> genres = new ArrayList<>(film.getGenres());
-            jdbcTemplate.batchUpdate("insert into film_genre (id_film, genre_id) values (?, ?)",
-                    new BatchPreparedStatementSetter() {
-                        @Override
-                        public void setValues(PreparedStatement ps, int i) throws SQLException {
-                            ps.setInt(1, film.getId());
-                            ps.setInt(2, genres.get(i).getId());
-                        }
-
-                        @Override
-                        public int getBatchSize() {
-                            return genres.size();
-                        }
-                    });
-        } else {
-            String sqlForGenre = "delete from film_genre where id_film = ?";
-            jdbcTemplate.update(sqlForGenre, film.getId());
+            saveFilmGenre(film.getId(), genres);
         }
         return film.getId();
     }
 
-    private Film makeFilm(ResultSet rs, int rowNum) throws SQLException {
+    static Film makeFilm(ResultSet rs, int rowNum) throws SQLException {
         Film film = new Film();
         Mpa mpa = new Mpa();
         mpa.setId(rs.getInt("mpa"));
         mpa.setName(rs.getString("name_rate"));
-        Set<Genre> genres = new TreeSet<>((genre1, genre2) -> {
-            if (genre1.getId() < genre2.getId()) return -1;
-            else return 1;
-        });
-        String sql = "select fg.genre_id, g.genre from film_genre as fg " +
-                "inner join genre as g on g.id = fg.genre_id " +
-                "where fg.id_film = ?";
-        List<Map<String, Object>> result = jdbcTemplate.queryForList(sql, rs.getInt("film_id"));
-        if (result != null) {
-            for (Map<String, Object> map : result) {
-                Genre savedGenre = new Genre();
-                savedGenre.setId((Integer) map.get("genre_id"));
-                savedGenre.setName((String) map.get("genre"));
-                genres.add(savedGenre);
-            }
-        }
         film.setId(rs.getInt("film_id"));
         film.setMpa(mpa);
         film.setDuration(rs.getInt("duration"));
@@ -136,7 +93,22 @@ public class FilmDbStorage implements FilmStorageDao {
         film.setName(rs.getString("name"));
         film.setReleaseDate(rs.getDate("release_data").toLocalDate());
         film.setRate(rs.getInt("rate"));
-        film.setGenres(genres);
         return film;
+    }
+
+    private void saveFilmGenre(int idFilm, List<Genre> genres) {
+        jdbcTemplate.batchUpdate("insert into film_genre (id_film, genre_id) values (?, ?)",
+                new BatchPreparedStatementSetter() {
+                    @Override
+                    public void setValues(PreparedStatement ps, int i) throws SQLException {
+                        ps.setInt(1, idFilm);
+                        ps.setInt(2, genres.get(i).getId());
+                    }
+
+                    @Override
+                    public int getBatchSize() {
+                        return genres.size();
+                    }
+                });
     }
 }

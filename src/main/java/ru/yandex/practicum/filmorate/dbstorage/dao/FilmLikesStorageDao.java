@@ -7,8 +7,8 @@ import java.util.List;
 public interface FilmLikesStorageDao {
     List<Film> getPopularFilms(int count);
 
-    Film deleteLike(int idFilm, int idUser);
+    void deleteLike(int idFilm, int idUser);
 
-    Film addLikes(int idFilm, int idUser);
+    void addLikes(int idFilm, int idUser);
 
 }

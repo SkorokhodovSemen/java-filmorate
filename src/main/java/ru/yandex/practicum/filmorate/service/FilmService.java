@@ -11,11 +11,15 @@ import ru.yandex.practicum.filmorate.dbstorage.FilmGenreDbStorage;
 import ru.yandex.practicum.filmorate.dbstorage.FilmLikesDbStorage;
 import ru.yandex.practicum.filmorate.dbstorage.UserDbStorage;
 import ru.yandex.practicum.filmorate.exception.NotFoundException;
+import ru.yandex.practicum.filmorate.exception.SqlException;
 import ru.yandex.practicum.filmorate.exception.ValidationException;
 import ru.yandex.practicum.filmorate.model.Film;
+import ru.yandex.practicum.filmorate.model.Genre;
 
+import java.sql.SQLException;
 import java.time.LocalDate;
-import java.util.List;
+import java.util.*;
+import java.util.stream.Collectors;
 
 @Service
 public class FilmService {
@@ -38,40 +42,59 @@ public class FilmService {
     }
 
     public List<Film> findAll() {
-        return filmDbStorage.findAll();
+        return filmDbStorage.findAll().stream().map(film -> {
+            try {
+                return makeGenreForFilm(film);
+            } catch (SQLException e) {
+                throw new SqlException("Ошибка в добавлении жанров для фильма");
+            }
+        }).collect(Collectors.toList());
     }
 
     public Film findById(int id) {
         validFound(id);
-        return filmDbStorage.findById(id);
+        try {
+            return makeGenreForFilm(filmDbStorage.findById(id));
+        } catch (SQLException e) {
+            throw new SqlException("Ошибка в добавлении жанров для фильма");
+        }
     }
 
     public Film create(Film film) {
         validate(film);
-        Film filmSaved = filmDbStorage.findById(filmDbStorage.create(film));
-        return filmSaved;
+        int id = filmDbStorage.create(film);
+        try {
+            log.info("Фильм создан с id {}", id);
+            return makeGenreForFilm(filmDbStorage.findById(id));
+        } catch (SQLException e) {
+            throw new SqlException("Ошибка в добавлении жанров для фильма");
+        }
     }
 
     public Film update(Film film) {
         validFound(film.getId());
         validate(film);
-        return filmDbStorage.findById(filmDbStorage.update(film));
+        try {
+            return makeGenreForFilm(filmDbStorage.findById(filmDbStorage.update(film)));
+        } catch (SQLException e) {
+            throw new SqlException("Ошибка в добавлении жанров для фильма");
+        }
     }
 
     public List<Film> getPopularFilms(int count) {
         return filmLikesDbStorage.getPopularFilms(count);
     }
 
-    public Film deleteLike(int idFilm, int idUser) {
+    public void deleteLike(int idFilm, int idUser) {
         validFound(idFilm);
         validFoundForUser(idUser);
-        return filmLikesDbStorage.deleteLike(idFilm, idUser);
+        filmLikesDbStorage.deleteLike(idFilm, idUser);
     }
 
-    public Film addLikes(int idFilm, int idUser) {
+    public void addLikes(int idFilm, int idUser) {
         validFound(idFilm);
         validFoundForUser(idUser);
-        return filmLikesDbStorage.addLikes(idFilm, idUser);
+        filmLikesDbStorage.addLikes(idFilm, idUser);
     }
 
 
@@ -106,5 +129,26 @@ public class FilmService {
         if (!userRows.next()) {
             throw new NotFoundException("id " + idUser + " не найден");
         }
+    }
+
+    private Film makeGenreForFilm(Film film) throws SQLException {
+        Set<Genre> genres = new TreeSet<>((genre1, genre2) -> {
+            if (genre1.getId() < genre2.getId()) return -1;
+            else return 1;
+        });
+        String sql = "select fg.genre_id, g.genre from film_genre as fg " +
+                "inner join genre as g on g.id = fg.genre_id " +
+                "where fg.id_film = ?";
+        List<Map<String, Object>> result = jdbcTemplate.queryForList(sql, film.getId());
+        if (result != null) {
+            for (Map<String, Object> map : result) {
+                Genre savedGenre = new Genre();
+                savedGenre.setId((Integer) map.get("genre_id"));
+                savedGenre.setName((String) map.get("genre"));
+                genres.add(savedGenre);
+            }
+        }
+        film.setGenres(genres);
+        return film;
     }
 }

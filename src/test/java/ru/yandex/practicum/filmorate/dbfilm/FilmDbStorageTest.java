@@ -173,7 +173,7 @@ public class FilmDbStorageTest {
     public void testAddLikesAndDeleteLikesAndPopularsFilm() {
         UserStorageDao userStorageDao = new UserDbStorage(jdbcTemplate);
         FilmStorageDao filmStorageDao = new FilmDbStorage(jdbcTemplate);
-        FilmLikesStorageDao filmLikesStorageDao = new FilmLikesDbStorage(jdbcTemplate, filmStorageDao);
+        FilmLikesStorageDao filmLikesStorageDao = new FilmLikesDbStorage(jdbcTemplate);
         userStorageDao.create(user);
         userStorageDao.create(user);
         userStorageDao.create(user);
@@ -198,7 +198,7 @@ public class FilmDbStorageTest {
     public void testDeleteLikes() {
         UserStorageDao userStorageDao = new UserDbStorage(jdbcTemplate);
         FilmStorageDao filmStorageDao = new FilmDbStorage(jdbcTemplate);
-        FilmLikesStorageDao filmLikesStorageDao = new FilmLikesDbStorage(jdbcTemplate, filmStorageDao);
+        FilmLikesStorageDao filmLikesStorageDao = new FilmLikesDbStorage(jdbcTemplate);
         userStorageDao.create(user);
         filmStorageDao.create(film);
         filmLikesStorageDao.addLikes(1, 1);
