@@ -1,26 +1,77 @@
 package ru.yandex.practicum.filmorate.service;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.jdbc.core.JdbcTemplate;
+import org.springframework.jdbc.support.rowset.SqlRowSet;
 import org.springframework.stereotype.Service;
+import ru.yandex.practicum.filmorate.dbstorage.UserDbStorage;
+import ru.yandex.practicum.filmorate.dbstorage.UserRelationshipDbStorage;
 import ru.yandex.practicum.filmorate.exception.NotFoundException;
 import ru.yandex.practicum.filmorate.exception.ValidationException;
 import ru.yandex.practicum.filmorate.model.User;
-import ru.yandex.practicum.filmorate.storage.InMemoryUserStorage;
 
 import java.time.LocalDate;
-import java.util.ArrayList;
 import java.util.List;
-import java.util.Set;
-import java.util.stream.Collectors;
 
 @Service
-public class UserService extends EntityService<User, InMemoryUserStorage> {
+public class UserService {
+    protected Logger log = LoggerFactory.getLogger(UserService.class);
+    private final UserDbStorage userDbStorage;
+    private final JdbcTemplate jdbcTemplate;
+    private final UserRelationshipDbStorage userRelationshipDbStorage;
+
     @Autowired
-    public UserService(InMemoryUserStorage userStorage) {
-        super(userStorage);
+    public UserService(UserDbStorage userDbStorage, JdbcTemplate jdbcTemplate, UserRelationshipDbStorage userRelationshipDbStorage) {
+        this.userDbStorage = userDbStorage;
+        this.jdbcTemplate = jdbcTemplate;
+        this.userRelationshipDbStorage = userRelationshipDbStorage;
     }
 
-    @Override
+    public List<User> findAll() {
+        return userDbStorage.findAll();
+    }
+
+    public User findById(int id) {
+        validFound(id);
+        return userDbStorage.findById(id);
+    }
+
+    public User create(User user) {
+        validate(user);
+        return userDbStorage.create(user);
+    }
+
+    public User update(User user) {
+        validate(user);
+        validFound(user.getId());
+        return userDbStorage.update(user);
+    }
+
+    public void addFriend(int idUser1, int idUser2) {
+        validFound(idUser1);
+        validFound(idUser2);
+        userRelationshipDbStorage.addFriend(idUser1, idUser2);
+    }
+
+    public void deleteFriend(int idUser1, int idUser2) {
+        validFound(idUser1);
+        validFound(idUser2);
+        userRelationshipDbStorage.deleteFriend(idUser1, idUser2);
+    }
+
+    public List<User> getCommonFriends(int idUser1, int idUser2) {
+        validFound(idUser1);
+        validFound(idUser2);
+        return userRelationshipDbStorage.getCommonFriends(idUser1, idUser2);
+    }
+
+    public List<User> getAllFriends(int idUser) {
+        validFound(idUser);
+        return userRelationshipDbStorage.getAllFriends(idUser);
+    }
+
     void validate(User user) {
         if (user.getEmail().isBlank() || !user.getEmail().contains("@") || user.getEmail() == null) {
             log.info("Пользователь неверно ввел почту: {}", user.getEmail());
@@ -39,48 +90,10 @@ public class UserService extends EntityService<User, InMemoryUserStorage> {
         }
     }
 
-    public User addFriend(int idUser1, int idUser2) {
-        validFound(idUser1, idUser2);
-        entityStorage.getStorage().get(idUser1).addFriend(idUser2);
-        entityStorage.getStorage().get(idUser2).addFriend(idUser1);
-        return entityStorage.getStorage().get(idUser1);
-    }
-
-    public User deleteFriend(int idUser1, int idUser2) {
-        validFound(idUser1, idUser2);
-        entityStorage.getStorage().get(idUser1).deleteFriend(idUser2);
-        entityStorage.getStorage().get(idUser2).deleteFriend(idUser1);
-        return entityStorage.getStorage().get(idUser1);
-    }
-
-    public List<User> getCommonFriends(int idUser1, int idUser2) {
-        validFound(idUser1, idUser2);
-        List<User> commonFriends = new ArrayList<>();
-        Set<Integer> commonId = entityStorage.getStorage().get(idUser1).getFriends().stream()
-                .filter(entityStorage.getStorage().get(idUser2).getFriends()::contains).collect(Collectors.toSet());
-        for (Integer id : commonId) {
-            commonFriends.add(entityStorage.getStorage().get(id));
-        }
-        return commonFriends;
-    }
-
-    public List<User> getAllFriends(int idUser) {
-        if (!entityStorage.getStorage().containsKey(idUser)) {
-            throw new NotFoundException("Пользователь " + idUser + " не найден");
-        }
-        List<User> friends = new ArrayList<>();
-        for (Integer id : entityStorage.getStorage().get(idUser).getFriends()) {
-            friends.add(entityStorage.getStorage().get(id));
-        }
-        return friends;
-    }
-
-    private void validFound(int idUser1, int idUser2) {
-        if (!entityStorage.getStorage().containsKey(idUser1)) {
-            throw new NotFoundException("Пользователь " + idUser1 + " не найден");
-        }
-        if (!entityStorage.getStorage().containsKey(idUser2)) {
-            throw new NotFoundException("Пользователь " + idUser2 + " не найден");
+    private void validFound(int idUser) {
+        SqlRowSet userRows = jdbcTemplate.queryForRowSet("select * from user_filmorate where user_id = ?", idUser);
+        if (!userRows.next()) {
+            throw new NotFoundException("id " + idUser + " не найден");
         }
     }
 }

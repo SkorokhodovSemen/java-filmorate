@@ -1,61 +1,103 @@
 package ru.yandex.practicum.filmorate.service;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.jdbc.core.JdbcTemplate;
+import org.springframework.jdbc.support.rowset.SqlRowSet;
 import org.springframework.stereotype.Service;
+import ru.yandex.practicum.filmorate.dbstorage.FilmDbStorage;
+import ru.yandex.practicum.filmorate.dbstorage.FilmGenreDbStorage;
+import ru.yandex.practicum.filmorate.dbstorage.FilmLikesDbStorage;
+import ru.yandex.practicum.filmorate.dbstorage.UserDbStorage;
 import ru.yandex.practicum.filmorate.exception.NotFoundException;
+import ru.yandex.practicum.filmorate.exception.SqlException;
 import ru.yandex.practicum.filmorate.exception.ValidationException;
 import ru.yandex.practicum.filmorate.model.Film;
-import ru.yandex.practicum.filmorate.storage.InMemoryFilmStorage;
-import ru.yandex.practicum.filmorate.storage.InMemoryUserStorage;
+import ru.yandex.practicum.filmorate.model.Genre;
 
+import java.sql.SQLException;
 import java.time.LocalDate;
-import java.util.List;
+import java.util.*;
 import java.util.stream.Collectors;
 
 @Service
-public class FilmService extends EntityService<Film, InMemoryFilmStorage> {
+public class FilmService {
     private static final int MAX_SYMBOLS = 200;
     private static final LocalDate RELEASE_DATA = LocalDate.of(1895, 12, 28);
-    private final InMemoryUserStorage userStorage;
+    private final FilmDbStorage filmDbStorage;
+    private final UserDbStorage userDbStorage;
+    private final FilmLikesDbStorage filmLikesDbStorage;
+    private final FilmGenreDbStorage filmGenreDbStorage;
+    private final JdbcTemplate jdbcTemplate;
+    private Logger log = LoggerFactory.getLogger(FilmService.class);
 
     @Autowired
-    public FilmService(InMemoryFilmStorage filmStorage, InMemoryUserStorage userStorage) {
-        super(filmStorage);
-        this.userStorage = userStorage;
+    public FilmService(FilmDbStorage filmDbStorage, UserDbStorage userDbStorage, FilmLikesDbStorage filmLikesDbStorage, FilmGenreDbStorage filmGenreDbStorage, JdbcTemplate jdbcTemplate) {
+        this.filmDbStorage = filmDbStorage;
+        this.userDbStorage = userDbStorage;
+        this.filmLikesDbStorage = filmLikesDbStorage;
+        this.filmGenreDbStorage = filmGenreDbStorage;
+        this.jdbcTemplate = jdbcTemplate;
     }
 
-    public Film addLikes(int idFilm, int idUser) {
-        validFound(idFilm, idUser);
-        entityStorage.getStorage().get(idFilm).addLikes(idUser);
-        return entityStorage.getStorage().get(idFilm);
+    public List<Film> findAll() {
+        return filmDbStorage.findAll().stream().map(film -> {
+            try {
+                return makeGenreForFilm(film);
+            } catch (SQLException e) {
+                throw new SqlException("Ошибка в добавлении жанров для фильма");
+            }
+        }).collect(Collectors.toList());
     }
 
-    public Film deleteLike(int idFilm, int idUser) {
-        validFound(idFilm, idUser);
-        entityStorage.getStorage().get(idFilm).deleteLikes(idUser);
-        return entityStorage.getStorage().get(idFilm);
+    public Film findById(int id) {
+        validFound(id);
+        try {
+            return makeGenreForFilm(filmDbStorage.findById(id));
+        } catch (SQLException e) {
+            throw new SqlException("Ошибка в добавлении жанров для фильма");
+        }
+    }
+
+    public Film create(Film film) {
+        validate(film);
+        int id = filmDbStorage.create(film);
+        try {
+            log.info("Фильм создан с id {}", id);
+            return makeGenreForFilm(filmDbStorage.findById(id));
+        } catch (SQLException e) {
+            throw new SqlException("Ошибка в добавлении жанров для фильма");
+        }
+    }
+
+    public Film update(Film film) {
+        validFound(film.getId());
+        validate(film);
+        try {
+            return makeGenreForFilm(filmDbStorage.findById(filmDbStorage.update(film)));
+        } catch (SQLException e) {
+            throw new SqlException("Ошибка в добавлении жанров для фильма");
+        }
     }
 
     public List<Film> getPopularFilms(int count) {
-        return entityStorage.findAll().stream()
-                .sorted((f1, f2) -> {
-                    if (f1.getRate() > f2.getRate()) return 1;
-                    else return -1;
-                })
-                .limit(count)
-                .collect(Collectors.toList());
+        return filmLikesDbStorage.getPopularFilms(count);
     }
 
-    private void validFound(int idFilm, int idUser) {
-        if (!entityStorage.getStorage().containsKey(idFilm)) {
-            throw new NotFoundException("Фильм " + idFilm + " не найден");
-        }
-        if (!userStorage.getStorage().containsKey(idUser)) {
-            throw new NotFoundException("Пользователь " + idUser + " не найден");
-        }
+    public void deleteLike(int idFilm, int idUser) {
+        validFound(idFilm);
+        validFoundForUser(idUser);
+        filmLikesDbStorage.deleteLike(idFilm, idUser);
     }
 
-    @Override
+    public void addLikes(int idFilm, int idUser) {
+        validFound(idFilm);
+        validFoundForUser(idUser);
+        filmLikesDbStorage.addLikes(idFilm, idUser);
+    }
+
+
     void validate(Film film) {
         if (film.getName().isBlank() || film.getName() == null) {
             log.info("Пользователь неверно ввел имя фильма: {}", film.getName());
@@ -73,5 +115,40 @@ public class FilmService extends EntityService<Film, InMemoryFilmStorage> {
             log.info("Пользователь неверно ввел продолжительность фильма: {}", film.getDuration());
             throw new ValidationException("Продолжительность фильма должна быть положительной");
         }
+    }
+
+    private void validFound(int idFilm) {
+        SqlRowSet userRows = jdbcTemplate.queryForRowSet("select * from film where film_id = ?", idFilm);
+        if (!userRows.next()) {
+            throw new NotFoundException("id " + idFilm + " не найден");
+        }
+    }
+
+    private void validFoundForUser(int idUser) {
+        SqlRowSet userRows = jdbcTemplate.queryForRowSet("select * from user_filmorate where user_id = ?", idUser);
+        if (!userRows.next()) {
+            throw new NotFoundException("id " + idUser + " не найден");
+        }
+    }
+
+    private Film makeGenreForFilm(Film film) throws SQLException {
+        Set<Genre> genres = new TreeSet<>((genre1, genre2) -> {
+            if (genre1.getId() < genre2.getId()) return -1;
+            else return 1;
+        });
+        String sql = "select fg.genre_id, g.genre from film_genre as fg " +
+                "inner join genre as g on g.id = fg.genre_id " +
+                "where fg.id_film = ?";
+        List<Map<String, Object>> result = jdbcTemplate.queryForList(sql, film.getId());
+        if (result != null) {
+            for (Map<String, Object> map : result) {
+                Genre savedGenre = new Genre();
+                savedGenre.setId((Integer) map.get("genre_id"));
+                savedGenre.setName((String) map.get("genre"));
+                genres.add(savedGenre);
+            }
+        }
+        film.setGenres(genres);
+        return film;
     }
 }
