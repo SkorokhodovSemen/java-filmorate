@@ -15,7 +15,6 @@ import ru.yandex.practicum.filmorate.exception.SqlException;
 import ru.yandex.practicum.filmorate.exception.ValidationException;
 import ru.yandex.practicum.filmorate.model.Film;
 import ru.yandex.practicum.filmorate.model.Genre;
-import ru.yandex.practicum.filmorate.model.User;
 
 import java.sql.SQLException;
 import java.time.LocalDate;
