@@ -25,7 +25,7 @@ public class FilmLikesDbStorage implements FilmLikesStorageDao {
     public List<Film> getLikedFilms(int idUser) {
         String sql = "select * from film as f" +
                 " inner join film_likes as f_l on f.film_id = f_l.id_film" +
-                " inner join mpa as m on f.mpa = m.id"+
+                " inner join mpa as m on f.mpa = m.id" +
                 " where f_l.id_user = ?" +
                 " order by f.rate desc";
         return jdbcTemplate.query(sql, FilmDbStorage::makeFilm, idUser);
