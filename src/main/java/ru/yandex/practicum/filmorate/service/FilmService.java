@@ -15,6 +15,7 @@ import ru.yandex.practicum.filmorate.exception.SqlException;
 import ru.yandex.practicum.filmorate.exception.ValidationException;
 import ru.yandex.practicum.filmorate.model.Film;
 import ru.yandex.practicum.filmorate.model.Genre;
+import ru.yandex.practicum.filmorate.model.User;
 
 import java.sql.SQLException;
 import java.time.LocalDate;
@@ -150,5 +151,13 @@ public class FilmService {
         }
         film.setGenres(genres);
         return film;
+    }
+
+    public List<Film> getCommonFilms(int userId, int friendId) {
+        validFoundForUser(userId);
+        validFoundForUser(friendId);
+        List<Film> usersLikedFilms = filmLikesDbStorage.getLikedFilms(userId);
+        List<Film> friendsLikedFilms = filmLikesDbStorage.getLikedFilms(friendId);
+        return usersLikedFilms.stream().filter(friendsLikedFilms::contains).collect(Collectors.toList());
     }
 }
