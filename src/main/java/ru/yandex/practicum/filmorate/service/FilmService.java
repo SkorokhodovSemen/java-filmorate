@@ -155,8 +155,7 @@ public class FilmService {
     public List<Film> getCommonFilms(int userId, int friendId) {
         validFoundForUser(userId);
         validFoundForUser(friendId);
-        List<Film> usersLikedFilms = filmLikesDbStorage.getLikedFilms(userId);
-        List<Film> friendsLikedFilms = filmLikesDbStorage.getLikedFilms(friendId);
-        return usersLikedFilms.stream().filter(friendsLikedFilms::contains).collect(Collectors.toList());
+        List<Film> usersLikedFilms = filmLikesDbStorage.getLikedFilms(userId, friendId);
+        return usersLikedFilms;
     }
 }

@@ -22,13 +22,14 @@ public class FilmLikesDbStorage implements FilmLikesStorageDao {
     }
 
     @Override
-    public List<Film> getLikedFilms(int idUser) {
+    public List<Film> getLikedFilms(int idUser1, int idUser2) {
         String sql = "select * from film as f" +
-                " inner join film_likes as f_l on f.film_id = f_l.id_film" +
                 " inner join mpa as m on f.mpa = m.id" +
-                " where f_l.id_user = ?" +
+                " inner join film_likes as f_l on f.film_id = f_l.id_film" +
+                " where (f_l.id_user = ? and f_l.id_film =" +
+                " (select f_l.id_film from film_likes where film_likes.id_user = ?))" +
                 " order by f.rate desc";
-        return jdbcTemplate.query(sql, FilmDbStorage::makeFilm, idUser);
+        return jdbcTemplate.query(sql, FilmDbStorage::makeFilm, idUser1, idUser2);
     }
 
     @Override
@@ -48,6 +49,4 @@ public class FilmLikesDbStorage implements FilmLikesStorageDao {
         String sqlRate = "update film set rate = (rate + 1) where film_id = ?";
         jdbcTemplate.update(sqlRate, idFilm);
     }
-
-
 }
