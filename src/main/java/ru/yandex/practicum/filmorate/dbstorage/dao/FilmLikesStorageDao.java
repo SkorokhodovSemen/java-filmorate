@@ -7,6 +7,12 @@ import java.util.List;
 public interface FilmLikesStorageDao {
     List<Film> getPopularFilms(int count);
 
+    List<Film> getPopularFilmsWithGenreAndYear(int count, int idGenre, int year);
+
+    List<Film> getPopularFilmsWithGenre(int count, int idGenre);
+
+    List<Film> getPopularFilmsWithYear(int count, int year);
+
     void deleteLike(int idFilm, int idUser);
 
     void addLikes(int idFilm, int idUser);
