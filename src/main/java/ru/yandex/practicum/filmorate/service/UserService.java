@@ -6,14 +6,22 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.jdbc.support.rowset.SqlRowSet;
 import org.springframework.stereotype.Service;
+import ru.yandex.practicum.filmorate.dbstorage.FilmLikesDbStorage;
 import ru.yandex.practicum.filmorate.dbstorage.UserDbStorage;
 import ru.yandex.practicum.filmorate.dbstorage.UserRelationshipDbStorage;
 import ru.yandex.practicum.filmorate.exception.NotFoundException;
 import ru.yandex.practicum.filmorate.exception.ValidationException;
+import ru.yandex.practicum.filmorate.model.Film;
+import ru.yandex.practicum.filmorate.model.Genre;
 import ru.yandex.practicum.filmorate.model.User;
 
+import java.sql.SQLException;
 import java.time.LocalDate;
 import java.util.List;
+import java.util.Map;
+import java.util.Set;
+import java.util.TreeSet;
+import java.util.stream.Collectors;
 
 @Service
 public class UserService {
@@ -21,11 +29,15 @@ public class UserService {
     private final UserDbStorage userDbStorage;
     private final JdbcTemplate jdbcTemplate;
     private final UserRelationshipDbStorage userRelationshipDbStorage;
+    private final FilmLikesDbStorage filmLikesDbStorage;
 
     @Autowired
-    public UserService(UserDbStorage userDbStorage, JdbcTemplate jdbcTemplate, UserRelationshipDbStorage userRelationshipDbStorage) {
+    public UserService(UserDbStorage userDbStorage, JdbcTemplate jdbcTemplate,
+                       UserRelationshipDbStorage userRelationshipDbStorage,
+                       FilmLikesDbStorage filmLikesDbStorage) {
         this.userDbStorage = userDbStorage;
         this.jdbcTemplate = jdbcTemplate;
+        this.filmLikesDbStorage = filmLikesDbStorage;
         this.userRelationshipDbStorage = userRelationshipDbStorage;
     }
 
@@ -72,6 +84,17 @@ public class UserService {
         return userRelationshipDbStorage.getAllFriends(idUser);
     }
 
+    public List<Film> getRecommendations(int idUser) {
+        validFound(idUser);
+        return filmLikesDbStorage.getRecommendations(idUser).stream().map(film -> {
+            try {
+                return makeGenreForFilm(film);
+            } catch (SQLException e) {
+                throw new RuntimeException(e);
+            }
+        }).collect(Collectors.toList());
+    }
+
     void validate(User user) {
         if (user.getEmail().isBlank() || !user.getEmail().contains("@") || user.getEmail() == null) {
             log.info("Пользователь неверно ввел почту: {}", user.getEmail());
@@ -95,5 +118,26 @@ public class UserService {
         if (!userRows.next()) {
             throw new NotFoundException("id " + idUser + " не найден");
         }
+    }
+
+    private Film makeGenreForFilm(Film film) throws SQLException {
+        Set<Genre> genres = new TreeSet<>((genre1, genre2) -> {
+            if (genre1.getId() < genre2.getId()) return -1;
+            else return 1;
+        });
+        String sql = "select fg.genre_id, g.genre from film_genre as fg " +
+                "inner join genre as g on g.id = fg.genre_id " +
+                "where fg.id_film = ?";
+        List<Map<String, Object>> result = jdbcTemplate.queryForList(sql, film.getId());
+        if (result != null) {
+            for (Map<String, Object> map : result) {
+                Genre savedGenre = new Genre();
+                savedGenre.setId((Integer) map.get("genre_id"));
+                savedGenre.setName((String) map.get("genre"));
+                genres.add(savedGenre);
+            }
+        }
+        film.setGenres(genres);
+        return film;
     }
 }
