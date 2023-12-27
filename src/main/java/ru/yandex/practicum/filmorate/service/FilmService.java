@@ -30,15 +30,17 @@ public class FilmService {
     private final FilmLikesDbStorage filmLikesDbStorage;
     private final FilmGenreDbStorage filmGenreDbStorage;
     private final JdbcTemplate jdbcTemplate;
+    private final FeedService feedService;
     private Logger log = LoggerFactory.getLogger(FilmService.class);
 
     @Autowired
-    public FilmService(FilmDbStorage filmDbStorage, UserDbStorage userDbStorage, FilmLikesDbStorage filmLikesDbStorage, FilmGenreDbStorage filmGenreDbStorage, JdbcTemplate jdbcTemplate) {
+    public FilmService(FilmDbStorage filmDbStorage, UserDbStorage userDbStorage, FilmLikesDbStorage filmLikesDbStorage, FilmGenreDbStorage filmGenreDbStorage, JdbcTemplate jdbcTemplate, FeedService feedService) {
         this.filmDbStorage = filmDbStorage;
         this.userDbStorage = userDbStorage;
         this.filmLikesDbStorage = filmLikesDbStorage;
         this.filmGenreDbStorage = filmGenreDbStorage;
         this.jdbcTemplate = jdbcTemplate;
+        this.feedService = feedService;
     }
 
     public List<Film> findAll() {
@@ -89,14 +91,15 @@ public class FilmService {
         validFound(idFilm);
         validFoundForUser(idUser);
         filmLikesDbStorage.deleteLike(idFilm, idUser);
+        feedService.createDeleteLikesEvent(idUser, idFilm);
     }
 
     public void addLikes(int idFilm, int idUser) {
         validFound(idFilm);
         validFoundForUser(idUser);
         filmLikesDbStorage.addLikes(idFilm, idUser);
+        feedService.addLikesEvent(idUser, idFilm);
     }
-
 
     void validate(Film film) {
         if (film.getName().isBlank() || film.getName() == null) {
