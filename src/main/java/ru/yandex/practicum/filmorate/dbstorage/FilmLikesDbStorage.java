@@ -112,6 +112,7 @@ public class FilmLikesDbStorage implements FilmLikesStorageDao {
                         uPred.put(k, uPred.get(k) + finalValue);
                         uFreq.put(k, uFreq.get(k) + freq.get(k).get(j).intValue());
                     } catch (NullPointerException e1) {
+                        throw new NullPointerException("Ошибка в обработке рекомендаций");
                     }
                 }
             }
