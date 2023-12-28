@@ -5,10 +5,7 @@ import org.springframework.stereotype.Component;
 import ru.yandex.practicum.filmorate.dbstorage.dao.FilmLikesStorageDao;
 import ru.yandex.practicum.filmorate.model.Film;
 
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 import java.util.Map.Entry;
 
 @Component
@@ -42,11 +39,7 @@ public class FilmLikesDbStorage implements FilmLikesStorageDao {
         HashMap<Integer, Integer> uPred = new HashMap<Integer, Integer>();
         HashMap<Integer, Integer> uFreq = new HashMap<Integer, Integer>();
         Map<Integer, HashMap<Integer, Integer>> inputData = new HashMap<>();
-        String sql = "select id_film from film_likes group by id_film";
-        List<Integer> idFilm = jdbcTemplate.queryForList(sql, Integer.class);
-        if (idFilm.isEmpty()) {
-            return new ArrayList<>();
-        }
+        Set<Integer> idFilm = new TreeSet<>();
         String sqlForInputData = "select * from film_likes";
         List<Map<String, Object>> result = jdbcTemplate.queryForList(sqlForInputData);
         Map<Integer, List<Integer>> userLikes = new HashMap<>();
@@ -57,6 +50,14 @@ public class FilmLikesDbStorage implements FilmLikesStorageDao {
                 userLikes.put(((Integer) map.get("id_user")), newList);
             } else {
                 userLikes.get((Integer) map.get("id_user")).add((Integer) map.get("id_film"));
+            }
+        }
+        if (userLikes.isEmpty()) {
+            return new ArrayList<>();
+        } else {
+            for (Integer integer : userLikes.keySet()) {
+                for (Integer integer1 : userLikes.get(integer))
+                    idFilm.add(integer1);
             }
         }
         for (Integer integer : userLikes.keySet()) {
@@ -132,8 +133,7 @@ public class FilmLikesDbStorage implements FilmLikesStorageDao {
             outputData.put(e.getKey(), clean);
         }
         List<Integer> idRecommendation = new ArrayList<>();
-        String sqlForUser = "select id_film from film_likes where id_user = ?";
-        List<Integer> idFilmUser = jdbcTemplate.queryForList(sqlForUser, Integer.class, idUser);
+        List<Integer> idFilmUser = userLikes.get(idUser);
         for (Integer integer : outputData.get(idUser).keySet()) {
             if (outputData.get(idUser).get(integer) != -1) {
                 if (!idFilmUser.contains(integer)) {
