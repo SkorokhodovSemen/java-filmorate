@@ -26,30 +26,37 @@ public class FeedService {
     public List<FeedEvent> getFeedForUser(int idUser) {
         return feedEventDbStorage.getFeedEvents(idUser);
     }
+
     void addReviewEvent(int idUser, int idReview) {
         FeedEvent feedEvent = new FeedEvent(LocalDateTime.now().atZone(ZoneId.systemDefault()).toInstant().toEpochMilli(), EventType.REVIEW, EventOperation.ADD, idUser, 0, idReview);
         feedEventDbStorage.createFeedEvent(feedEvent);
     }
+
     void createDeleteReviewEvent(int idUser, int idReview) {
         FeedEvent feedEvent = new FeedEvent(LocalDateTime.now().atZone(ZoneId.systemDefault()).toInstant().toEpochMilli(), EventType.REVIEW, EventOperation.REMOVE, idUser, 0, idReview);
         feedEventDbStorage.createFeedEvent(feedEvent);
     }
+
     void updateReviewEvent(int idUser, int idReview) {
         FeedEvent feedEvent = new FeedEvent(LocalDateTime.now().atZone(ZoneId.systemDefault()).toInstant().toEpochMilli(), EventType.REVIEW, EventOperation.UPDATE, idUser, 0, idReview);
         feedEventDbStorage.createFeedEvent(feedEvent);
     }
+
     void addFriendsEvent(int idUser, int idFriend) {
         FeedEvent feedEvent = new FeedEvent(LocalDateTime.now().atZone(ZoneId.systemDefault()).toInstant().toEpochMilli(), EventType.FRIEND, EventOperation.ADD, idUser, 0, idFriend);
         feedEventDbStorage.createFeedEvent(feedEvent);
     }
+
     void createDeleteFriendsEvent(int idUser, int idFriend) {
         FeedEvent feedEvent = new FeedEvent(LocalDateTime.now().atZone(ZoneId.systemDefault()).toInstant().toEpochMilli(), EventType.FRIEND, EventOperation.REMOVE, idUser, 0, idFriend);
         feedEventDbStorage.createFeedEvent(feedEvent);
     }
+
     void addLikesEvent(int idUser, int idFilm) {
         FeedEvent feedEvent = new FeedEvent(LocalDateTime.now().atZone(ZoneId.systemDefault()).toInstant().toEpochMilli(), EventType.LIKE, EventOperation.ADD, idUser, 0, idFilm);
         feedEventDbStorage.createFeedEvent(feedEvent);
     }
+
     void createDeleteLikesEvent(int idUser, int idFilm) {
         FeedEvent feedEvent = new FeedEvent(LocalDateTime.now().atZone(ZoneId.systemDefault()).toInstant().toEpochMilli(), EventType.LIKE, EventOperation.REMOVE, idUser, 0, idFilm);
         feedEventDbStorage.createFeedEvent(feedEvent);
