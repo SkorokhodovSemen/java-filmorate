@@ -74,6 +74,7 @@ public class UserController {
 
     @GetMapping("/{id}/feed")
     public List<FeedEvent> getFeedForUser(@PathVariable("id") int idUser) {
+        userService.findById(idUser);
         log.info("Получен запрос на получение списка последних событий для пользователей с id {}", idUser);
         return feedService.getFeedForUser(idUser);
     }

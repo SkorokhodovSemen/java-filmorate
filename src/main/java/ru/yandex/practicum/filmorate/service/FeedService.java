@@ -10,6 +10,7 @@ import ru.yandex.practicum.filmorate.model.EventType;
 import ru.yandex.practicum.filmorate.model.FeedEvent;
 
 import java.time.LocalDateTime;
+import java.time.ZoneId;
 import java.util.List;
 
 @Service
@@ -26,31 +27,31 @@ public class FeedService {
         return feedEventDbStorage.getFeedEvents(idUser);
     }
     void addReviewEvent(int idUser, int idReview) {
-        FeedEvent feedEvent = new FeedEvent(LocalDateTime.now(), EventType.REVIEW, EventOperation.ADD, idUser, 0, idReview);
+        FeedEvent feedEvent = new FeedEvent(LocalDateTime.now().atZone(ZoneId.systemDefault()).toInstant().toEpochMilli(), EventType.REVIEW, EventOperation.ADD, idUser, 0, idReview);
         feedEventDbStorage.createFeedEvent(feedEvent);
     }
     void createDeleteReviewEvent(int idUser, int idReview) {
-        FeedEvent feedEvent = new FeedEvent(LocalDateTime.now(), EventType.REVIEW, EventOperation.REMOVE, idUser, 0, idReview);
+        FeedEvent feedEvent = new FeedEvent(LocalDateTime.now().atZone(ZoneId.systemDefault()).toInstant().toEpochMilli(), EventType.REVIEW, EventOperation.REMOVE, idUser, 0, idReview);
         feedEventDbStorage.createFeedEvent(feedEvent);
     }
     void updateReviewEvent(int idUser, int idReview) {
-        FeedEvent feedEvent = new FeedEvent(LocalDateTime.now(), EventType.REVIEW, EventOperation.UPDATE, idUser, 0, idReview);
+        FeedEvent feedEvent = new FeedEvent(LocalDateTime.now().atZone(ZoneId.systemDefault()).toInstant().toEpochMilli(), EventType.REVIEW, EventOperation.UPDATE, idUser, 0, idReview);
         feedEventDbStorage.createFeedEvent(feedEvent);
     }
     void addFriendsEvent(int idUser, int idFriend) {
-        FeedEvent feedEvent = new FeedEvent(LocalDateTime.now(), EventType.FRIENDS, EventOperation.ADD, idUser, 0, idFriend);
+        FeedEvent feedEvent = new FeedEvent(LocalDateTime.now().atZone(ZoneId.systemDefault()).toInstant().toEpochMilli(), EventType.FRIEND, EventOperation.ADD, idUser, 0, idFriend);
         feedEventDbStorage.createFeedEvent(feedEvent);
     }
     void createDeleteFriendsEvent(int idUser, int idFriend) {
-        FeedEvent feedEvent = new FeedEvent(LocalDateTime.now(), EventType.FRIENDS, EventOperation.REMOVE, idUser, 0, idFriend);
+        FeedEvent feedEvent = new FeedEvent(LocalDateTime.now().atZone(ZoneId.systemDefault()).toInstant().toEpochMilli(), EventType.FRIEND, EventOperation.REMOVE, idUser, 0, idFriend);
         feedEventDbStorage.createFeedEvent(feedEvent);
     }
     void addLikesEvent(int idUser, int idFilm) {
-        FeedEvent feedEvent = new FeedEvent(LocalDateTime.now(), EventType.LIKES, EventOperation.ADD, idUser, 0, idFilm);
+        FeedEvent feedEvent = new FeedEvent(LocalDateTime.now().atZone(ZoneId.systemDefault()).toInstant().toEpochMilli(), EventType.LIKE, EventOperation.ADD, idUser, 0, idFilm);
         feedEventDbStorage.createFeedEvent(feedEvent);
     }
     void createDeleteLikesEvent(int idUser, int idFilm) {
-        FeedEvent feedEvent = new FeedEvent(LocalDateTime.now(), EventType.LIKES, EventOperation.REMOVE, idUser, 0, idFilm);
+        FeedEvent feedEvent = new FeedEvent(LocalDateTime.now().atZone(ZoneId.systemDefault()).toInstant().toEpochMilli(), EventType.LIKE, EventOperation.REMOVE, idUser, 0, idFilm);
         feedEventDbStorage.createFeedEvent(feedEvent);
     }
 }
