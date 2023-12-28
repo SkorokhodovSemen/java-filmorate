@@ -6,5 +6,6 @@ import java.util.List;
 
 public interface FeedEventStorageDao {
     int createFeedEvent(FeedEvent feedEvent);
+
     List<FeedEvent> getFeedEvents(int idUser);
 }
