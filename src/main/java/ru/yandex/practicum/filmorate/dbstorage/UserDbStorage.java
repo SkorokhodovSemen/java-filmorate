@@ -81,7 +81,7 @@ public class UserDbStorage implements UserStorageDao {
         try {
             String sql = "DELETE FROM user_filmorate WHERE user_id = ?;";
             jdbcTemplate.update(sql, userId);
-        }catch (RuntimeException e){
+        } catch (RuntimeException e) {
             throw new NotFoundException("Нечего удалять");
         }
 
