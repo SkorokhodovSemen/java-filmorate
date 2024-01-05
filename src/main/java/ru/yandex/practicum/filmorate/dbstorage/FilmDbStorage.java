@@ -111,4 +111,10 @@ public class FilmDbStorage implements FilmStorageDao {
                     }
                 });
     }
+
+    @Override
+    public void deleteFilm(int filmId) {
+        String sql = "DELETE FROM film WHERE film_id = ?;";
+        jdbcTemplate.update(sql, filmId);
+    }
 }
