@@ -151,4 +151,8 @@ public class FilmService {
         film.setGenres(genres);
         return film;
     }
+
+    public void delete(int filmId){
+        filmDbStorage.deleteFilm(filmId);
+    }
 }

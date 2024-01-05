@@ -12,4 +12,8 @@ public interface FilmStorageDao {
     int create(Film entity);
 
     int update(Film entity);
+
+    void deleteFilm(int filmId);
 }
+
+

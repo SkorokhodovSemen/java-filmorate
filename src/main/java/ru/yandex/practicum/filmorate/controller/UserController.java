@@ -68,4 +68,9 @@ public class UserController {
         return userService.getCommonFriends(id, otherId);
     }
 
+    @DeleteMapping("/{userId}")
+    public void deleteUser(@PathVariable("userId") int userId){
+        log.info("Получен запрос на удаление пользователя с id = " + userId);
+        userService.delete(userId);
+    }
 }

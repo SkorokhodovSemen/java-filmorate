@@ -96,4 +96,8 @@ public class UserService {
             throw new NotFoundException("id " + idUser + " не найден");
         }
     }
+
+    public void delete(int userId){
+        userDbStorage.deleteUser(userId);
+    }
 }
