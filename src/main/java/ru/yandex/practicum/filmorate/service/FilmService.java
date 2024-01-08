@@ -6,13 +6,11 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.jdbc.support.rowset.SqlRowSet;
 import org.springframework.stereotype.Service;
-import ru.yandex.practicum.filmorate.dbstorage.FilmDbStorage;
-import ru.yandex.practicum.filmorate.dbstorage.FilmGenreDbStorage;
-import ru.yandex.practicum.filmorate.dbstorage.FilmLikesDbStorage;
-import ru.yandex.practicum.filmorate.dbstorage.UserDbStorage;
+import ru.yandex.practicum.filmorate.dbstorage.*;
 import ru.yandex.practicum.filmorate.exception.NotFoundException;
 import ru.yandex.practicum.filmorate.exception.SqlException;
 import ru.yandex.practicum.filmorate.exception.ValidationException;
+import ru.yandex.practicum.filmorate.model.Director;
 import ru.yandex.practicum.filmorate.model.Film;
 import ru.yandex.practicum.filmorate.model.Genre;
 
@@ -31,14 +29,16 @@ public class FilmService {
     private final FilmGenreDbStorage filmGenreDbStorage;
     private final JdbcTemplate jdbcTemplate;
     private Logger log = LoggerFactory.getLogger(FilmService.class);
+    private final DirectorDbStorage directorDbStorage;
 
     @Autowired
-    public FilmService(FilmDbStorage filmDbStorage, UserDbStorage userDbStorage, FilmLikesDbStorage filmLikesDbStorage, FilmGenreDbStorage filmGenreDbStorage, JdbcTemplate jdbcTemplate) {
+    public FilmService(FilmDbStorage filmDbStorage, UserDbStorage userDbStorage, FilmLikesDbStorage filmLikesDbStorage, FilmGenreDbStorage filmGenreDbStorage, JdbcTemplate jdbcTemplate, DirectorDbStorage directorDbStorage) {
         this.filmDbStorage = filmDbStorage;
         this.userDbStorage = userDbStorage;
         this.filmLikesDbStorage = filmLikesDbStorage;
         this.filmGenreDbStorage = filmGenreDbStorage;
         this.jdbcTemplate = jdbcTemplate;
+        this.directorDbStorage = directorDbStorage;
     }
 
     public List<Film> findAll() {
@@ -149,6 +149,26 @@ public class FilmService {
             }
         }
         film.setGenres(genres);
+
+        return film;
+    }
+
+    private Film addDirector(Film film) {
+        List<Director> directors = new ArrayList<>();
+        String sql = "SELECT fd.director_id, d.name_director FROM film_director AS fd" +
+                "INNER JOIN director AS d ON d.id = fd.director_id" +
+                "WHERE fd.film_id = ?;";
+        List<Map<String, Object>> result = jdbcTemplate.queryForList(sql, film.getId());
+        if (result != null) {
+            for (Map<String, Object> map : result) {
+                Director saveDirector = new Director();
+                saveDirector.setId((Integer) map.get("director_id"));
+                saveDirector.setName((String) map.get("name_director"));
+                directors.add(saveDirector);
+            }
+        }
+        film.setDirectors(directors);
+
         return film;
     }
 }

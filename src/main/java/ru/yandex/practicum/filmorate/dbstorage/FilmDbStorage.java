@@ -6,6 +6,7 @@ import org.springframework.jdbc.support.GeneratedKeyHolder;
 import org.springframework.jdbc.support.KeyHolder;
 import org.springframework.stereotype.Component;
 import ru.yandex.practicum.filmorate.dbstorage.dao.FilmStorageDao;
+import ru.yandex.practicum.filmorate.model.Director;
 import ru.yandex.practicum.filmorate.model.Film;
 import ru.yandex.practicum.filmorate.model.Genre;
 import ru.yandex.practicum.filmorate.model.Mpa;
@@ -27,13 +28,16 @@ public class FilmDbStorage implements FilmStorageDao {
 
     @Override
     public List<Film> findAll() {
-        String sql = "select * from film as f inner join mpa as m on f.mpa = m.id";
+        String sql = "select * from film as f " +
+                "inner join mpa as m on f.mpa = m.id ";
         return jdbcTemplate.query(sql, FilmDbStorage::makeFilm);
     }
 
     @Override
     public Film findById(int id) {
-        String sql = "select * from film as f inner join mpa as m on f.mpa = m.id where f.film_id = ?";
+        String sql = "select * from film as f " +
+                "inner join mpa as m on f.mpa = m.id " +
+                "where f.film_id = ?";
         return jdbcTemplate.queryForObject(sql, FilmDbStorage::makeFilm, id);
     }
 
@@ -56,6 +60,11 @@ public class FilmDbStorage implements FilmStorageDao {
             List<Genre> genres = new ArrayList<>(film.getGenres());
             saveFilmGenre(keyHolder.getKey().intValue(), genres);
         }
+
+        if (!film.getDirectors().isEmpty()) {
+            List<Director> directors = new ArrayList<>(film.getDirectors());
+            saveFilmDirector(keyHolder.getKey().intValue(), directors);
+        }
         return keyHolder.getKey().intValue();
     }
 
@@ -77,6 +86,13 @@ public class FilmDbStorage implements FilmStorageDao {
         if (!film.getGenres().isEmpty()) {
             List<Genre> genres = new ArrayList<>(film.getGenres());
             saveFilmGenre(film.getId(), genres);
+        }
+
+        String sqlDelete2 = "delete from film_director where film_id = ?";
+        jdbcTemplate.update(sqlDelete2, film.getId());
+        if (!film.getDirectors().isEmpty()) {
+            List<Director> directors = new ArrayList<>(film.getDirectors());
+            saveFilmDirector(film.getId(), directors);
         }
         return film.getId();
     }
@@ -110,5 +126,21 @@ public class FilmDbStorage implements FilmStorageDao {
                         return genres.size();
                     }
                 });
+    }
+
+    private void saveFilmDirector(int idFilm, List<Director> directors) {
+        String sql = "INSERT INTO film_director (film_id, director_id) VALUES (?,?);";
+        jdbcTemplate.batchUpdate(sql, new BatchPreparedStatementSetter() {
+            @Override
+            public void setValues(PreparedStatement ps, int i) throws SQLException {
+                ps.setInt(1, idFilm);
+                ps.setInt(2, directors.get(i).getId());
+            }
+
+            @Override
+            public int getBatchSize() {
+                return directors.size();
+            }
+        });
     }
 }
