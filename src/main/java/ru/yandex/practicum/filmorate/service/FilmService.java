@@ -91,7 +91,7 @@ public class FilmService {
                     .stream()
                     .map(film -> {
                         try {
-                            return makeGenreForFilm(film);
+                            return addDirector(makeGenreForFilm(film));
                         } catch (SQLException e) {
                             throw new SqlException("Ошибка в добавлении жанров для фильма");
                         }
@@ -103,7 +103,7 @@ public class FilmService {
                     .stream()
                     .map(film -> {
                         try {
-                            return makeGenreForFilm(film);
+                            return addDirector(makeGenreForFilm(film));
                         } catch (SQLException e) {
                             throw new SqlException("Ошибка в добавлении жанров для фильма");
                         }
@@ -116,7 +116,7 @@ public class FilmService {
                     .stream()
                     .map(film -> {
                         try {
-                            return makeGenreForFilm(film);
+                            return addDirector(makeGenreForFilm(film));
                         } catch (SQLException e) {
                             throw new SqlException("Ошибка в добавлении жанров для фильма");
                         }
@@ -127,7 +127,7 @@ public class FilmService {
                 .stream()
                 .map(film -> {
                     try {
-                        return makeGenreForFilm(film);
+                        return addDirector(makeGenreForFilm(film));
                     } catch (SQLException e) {
                         throw new SqlException("Ошибка в добавлении жанров для фильма");
                     }
