@@ -18,7 +18,13 @@ public class FilmLikesDbStorage implements FilmLikesStorageDao {
 
     @Override
     public List<Film> getPopularFilms(int count) {
-        String sql = "select * from film as f inner join mpa as m on f.mpa = m.id order by rate desc limit ?";
+        String sql = "select count(id_user) AS likes, f.*, m.name_rate " +
+                "from film_likes l " +
+                "RIGHT join film f ON f.film_id = l.id_film " +
+                "inner join mpa m on f.mpa = m.id " +
+                "GROUP BY f.film_id, m.id " +
+                "ORDER BY likes DESC " +
+                "LIMIT ?;";
         return jdbcTemplate.query(sql, FilmDbStorage::makeFilm, count);
     }
 
