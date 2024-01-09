@@ -83,8 +83,56 @@ public class FilmService {
         }
     }
 
-    public List<Film> getPopularFilms(int count) {
-        return filmLikesDbStorage.getPopularFilms(count);
+    public List<Film> getPopularFilmsWithGenreAndYear(int count, int idGenre, int year) {
+        if (idGenre != -1 && year != -1) {
+            validFoundForGenre(idGenre);
+            validFoundForYear(year);
+            return filmLikesDbStorage.getPopularFilmsWithGenreAndYear(count, idGenre, year)
+                    .stream()
+                    .map(film -> {
+                        try {
+                            return addDirector(makeGenreForFilm(film));
+                        } catch (SQLException e) {
+                            throw new SqlException("Ошибка в добавлении жанров для фильма");
+                        }
+                    }).collect(Collectors.toList());
+        }
+        if (idGenre == -1 && year != -1) {
+            validFoundForYear(year);
+            return filmLikesDbStorage.getPopularFilmsWithYear(count, year)
+                    .stream()
+                    .map(film -> {
+                        try {
+                            return addDirector(makeGenreForFilm(film));
+                        } catch (SQLException e) {
+                            throw new SqlException("Ошибка в добавлении жанров для фильма");
+                        }
+                    })
+                    .collect(Collectors.toList());
+        }
+        if (idGenre != -1 && year == -1) {
+            validFoundForGenre(idGenre);
+            return filmLikesDbStorage.getPopularFilmsWithGenre(count, idGenre)
+                    .stream()
+                    .map(film -> {
+                        try {
+                            return addDirector(makeGenreForFilm(film));
+                        } catch (SQLException e) {
+                            throw new SqlException("Ошибка в добавлении жанров для фильма");
+                        }
+                    })
+                    .collect(Collectors.toList());
+        }
+        return filmLikesDbStorage.getPopularFilms(count)
+                .stream()
+                .map(film -> {
+                    try {
+                        return addDirector(makeGenreForFilm(film));
+                    } catch (SQLException e) {
+                        throw new SqlException("Ошибка в добавлении жанров для фильма");
+                    }
+                })
+                .collect(Collectors.toList());
     }
 
     public void deleteLike(int idFilm, int idUser) {
@@ -130,6 +178,19 @@ public class FilmService {
         SqlRowSet userRows = jdbcTemplate.queryForRowSet("select * from user_filmorate where user_id = ?", idUser);
         if (!userRows.next()) {
             throw new NotFoundException("id " + idUser + " не найден");
+        }
+    }
+
+    private void validFoundForGenre(int idGenre) {
+        SqlRowSet userRows = jdbcTemplate.queryForRowSet("select * from genre where id = ?", idGenre);
+        if (!userRows.next()) {
+            throw new NotFoundException("id " + idGenre + " не найден");
+        }
+    }
+
+    private void validFoundForYear(int year) {
+        if (year > LocalDate.now().getYear()) {
+            throw new NotFoundException("Фильм еще не вышел, проверьте правильность написания года");
         }
     }
 
