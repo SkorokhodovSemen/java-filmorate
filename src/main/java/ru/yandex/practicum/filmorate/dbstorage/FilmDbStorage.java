@@ -1,5 +1,6 @@
 package ru.yandex.practicum.filmorate.dbstorage;
 
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.jdbc.core.BatchPreparedStatementSetter;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.jdbc.support.GeneratedKeyHolder;
@@ -11,20 +12,22 @@ import ru.yandex.practicum.filmorate.model.Film;
 import ru.yandex.practicum.filmorate.model.Genre;
 import ru.yandex.practicum.filmorate.model.Mpa;
 
+
 import java.sql.Date;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.List;
 
 @Component
 public class FilmDbStorage implements FilmStorageDao {
     private final JdbcTemplate jdbcTemplate;
 
+    @Autowired
     public FilmDbStorage(JdbcTemplate jdbcTemplate) {
         this.jdbcTemplate = jdbcTemplate;
     }
-
 
     @Override
     public List<Film> findAll() {
@@ -109,6 +112,7 @@ public class FilmDbStorage implements FilmStorageDao {
         film.setName(rs.getString("name"));
         film.setReleaseDate(rs.getDate("release_data").toLocalDate());
         film.setRate(rs.getInt("rate"));
+
         return film;
     }
 
@@ -142,5 +146,31 @@ public class FilmDbStorage implements FilmStorageDao {
                 return directors.size();
             }
         });
+    }
+
+    @Override
+    public List<Film> getDirectorFilms(int directorId, String sortBy) {
+        List<Film> sortFilms = new ArrayList<>();
+
+        if ("likes".equals(sortBy)) {
+            String sql = "select * from film as f " +
+                    "inner join mpa as m on f.mpa = m.id " +
+                    "inner join film_director as fd on f.film_id=fd.film_id " +
+                    "where fd.director_id = ? " +
+                    "order by rate desc;";
+            sortFilms = jdbcTemplate.query(sql, FilmDbStorage::makeFilm, directorId);
+
+        }
+
+        if ("year".equals(sortBy)) {
+            String sql = "select * from film as f " +
+                    "inner join mpa as m on f.mpa = m.id " +
+                    "inner join film_director as fd on f.film_id=fd.film_id " +
+                    "where fd.director_id = ? " +
+                    "order by release_data;";
+            sortFilms = jdbcTemplate.query(sql, FilmDbStorage::makeFilm, directorId);
+        }
+
+        return sortFilms;
     }
 }

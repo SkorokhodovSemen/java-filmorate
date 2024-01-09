@@ -80,7 +80,7 @@ public class DirectorDbStorage implements DirectorStorageDao {
         log.debug("В БД удален режиссер с ID=" + id);
     }
 
-   public RowMapper<Director> makeDirector() {
+   private RowMapper<Director> makeDirector() {
         return new RowMapper<Director>() {
             @Override
             public Director mapRow(ResultSet rs, int rowNum) throws SQLException {

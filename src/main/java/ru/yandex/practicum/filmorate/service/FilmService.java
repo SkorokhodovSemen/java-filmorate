@@ -32,7 +32,9 @@ public class FilmService {
     private final DirectorDbStorage directorDbStorage;
 
     @Autowired
-    public FilmService(FilmDbStorage filmDbStorage, UserDbStorage userDbStorage, FilmLikesDbStorage filmLikesDbStorage, FilmGenreDbStorage filmGenreDbStorage, JdbcTemplate jdbcTemplate, DirectorDbStorage directorDbStorage) {
+    public FilmService(FilmDbStorage filmDbStorage, UserDbStorage userDbStorage, FilmLikesDbStorage filmLikesDbStorage,
+                       FilmGenreDbStorage filmGenreDbStorage, JdbcTemplate jdbcTemplate,
+                       DirectorDbStorage directorDbStorage) {
         this.filmDbStorage = filmDbStorage;
         this.userDbStorage = userDbStorage;
         this.filmLikesDbStorage = filmLikesDbStorage;
@@ -97,14 +99,14 @@ public class FilmService {
         filmLikesDbStorage.addLikes(idFilm, idUser);
     }
 
-
     void validate(Film film) {
         if (film.getName().isBlank() || film.getName() == null) {
             log.info("Пользователь неверно ввел имя фильма: {}", film.getName());
             throw new ValidationException("Название фильма не может быть пустым");
         }
         if (film.getDescription().isBlank() || film.getDescription().length() > MAX_SYMBOLS) {
-            log.info("Пользователь неверно ввел описание фильма {}, количество символов {}", film.getDescription(), film.getDescription().length());
+            log.info("Пользователь неверно ввел описание фильма {}, количество символов {}", film.getDescription(),
+                    film.getDescription().length());
             throw new ValidationException("Описание не может быть пустым или превышать 200 символов");
         }
         if (film.getReleaseDate().isBefore(RELEASE_DATA)) {
@@ -150,13 +152,13 @@ public class FilmService {
         }
         film.setGenres(genres);
 
-        return film;
+        return addDirector(film);
     }
 
     private Film addDirector(Film film) {
         List<Director> directors = new ArrayList<>();
-        String sql = "SELECT fd.director_id, d.name_director FROM film_director AS fd" +
-                "INNER JOIN director AS d ON d.id = fd.director_id" +
+        String sql = "SELECT fd.director_id, d.name_director FROM film_director AS fd " +
+                "INNER JOIN director AS d ON d.id = fd.director_id " +
                 "WHERE fd.film_id = ?;";
         List<Map<String, Object>> result = jdbcTemplate.queryForList(sql, film.getId());
         if (result != null) {
@@ -170,5 +172,16 @@ public class FilmService {
         film.setDirectors(directors);
 
         return film;
+    }
+
+    public List<Film> getDirectorFilms(int directorId, String sortBy) {
+        directorDbStorage.findById(directorId);
+        return filmDbStorage.getDirectorFilms(directorId, sortBy).stream().map(film -> {
+            try {
+                return makeGenreForFilm(film);
+            } catch (SQLException e) {
+                throw new SqlException("Ошибка в добавлении жанров для фильма");
+            }
+        }).collect(Collectors.toList());
     }
 }
