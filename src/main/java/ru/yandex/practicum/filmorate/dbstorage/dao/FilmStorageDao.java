@@ -13,6 +13,8 @@ public interface FilmStorageDao {
 
     int update(Film entity);
 
+    List<Film> getDirectorFilms(int directorId, String sortBy);
+
     void deleteFilm(int filmId);
 }
 
