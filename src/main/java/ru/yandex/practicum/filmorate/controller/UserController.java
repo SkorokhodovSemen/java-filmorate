@@ -4,6 +4,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
+import ru.yandex.practicum.filmorate.model.Film;
 import ru.yandex.practicum.filmorate.model.FeedEvent;
 import ru.yandex.practicum.filmorate.model.User;
 import ru.yandex.practicum.filmorate.service.FeedService;
@@ -77,5 +78,16 @@ public class UserController {
         userService.findById(idUser);
         log.info("Получен запрос на получение списка последних событий для пользователей с id {}", idUser);
         return feedService.getFeedForUser(idUser);
+    }
+    @GetMapping("/{id}/recommendations")
+    public List<Film> getRecommendations(@PathVariable("id") int id) {
+        log.info("Получен запрос на получение рекомендаций для пользователя с id {}", id);
+        return userService.getRecommendations(id);
+    }
+
+    @DeleteMapping("/{userId}")
+    public void deleteUser(@PathVariable("userId") int userId) {
+        log.info("Получен запрос на удаление пользователя с id = " + userId);
+        userService.delete(userId);
     }
 }

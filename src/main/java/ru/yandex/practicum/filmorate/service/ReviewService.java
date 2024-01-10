@@ -25,6 +25,11 @@ public class ReviewService {
         this.reviewDbStorage = reviewDbStorage;
         this.jdbcTemplate = jdbcTemplate;
         this.feedService = feedService;
+
+    @Autowired
+    public ReviewService(ReviewDbStorage reviewDbStorage, JdbcTemplate jdbcTemplate) {
+        this.reviewDbStorage = reviewDbStorage;
+        this.jdbcTemplate = jdbcTemplate;
     }
 
     public Review create(Review review) {
