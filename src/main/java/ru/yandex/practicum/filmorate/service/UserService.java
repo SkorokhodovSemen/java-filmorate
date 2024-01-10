@@ -120,6 +120,10 @@ public class UserService {
         }
     }
 
+    public void delete(int userId) {
+        userDbStorage.deleteUser(userId);
+    }
+
     private Film makeGenreForFilm(Film film) throws SQLException {
         Set<Genre> genres = new TreeSet<>((genre1, genre2) -> {
             if (genre1.getId() < genre2.getId()) return -1;

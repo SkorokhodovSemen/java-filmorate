@@ -12,4 +12,6 @@ public interface UserStorageDao {
     User create(User entity);
 
     User update(User entity);
+
+    void deleteUser(int userId);
 }

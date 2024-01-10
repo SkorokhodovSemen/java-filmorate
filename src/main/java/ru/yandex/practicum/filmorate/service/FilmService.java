@@ -235,6 +235,10 @@ public class FilmService {
         return film;
     }
 
+    public void delete(int filmId) {
+        filmDbStorage.deleteFilm(filmId);
+    }
+
     public List<Film> getDirectorFilms(int directorId, String sortBy) {
         directorDbStorage.findById(directorId);
         return filmDbStorage.getDirectorFilms(directorId, sortBy).stream().map(film -> {
