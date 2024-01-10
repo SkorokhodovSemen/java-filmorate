@@ -79,6 +79,7 @@ public class UserController {
         log.info("Получен запрос на получение списка последних событий для пользователей с id {}", idUser);
         return feedService.getFeedForUser(idUser);
     }
+
     @GetMapping("/{id}/recommendations")
     public List<Film> getRecommendations(@PathVariable("id") int id) {
         log.info("Получен запрос на получение рекомендаций для пользователя с id {}", id);
