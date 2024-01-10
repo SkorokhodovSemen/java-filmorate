@@ -34,7 +34,7 @@ public class FilmService {
 
     @Autowired
     public FilmService(FilmDbStorage filmDbStorage, UserDbStorage userDbStorage, FilmLikesDbStorage filmLikesDbStorage,
-                       FilmGenreDbStorage filmGenreDbStorage, JdbcTemplate jdbcTemplate,
+                       FilmGenreDbStorage filmGenreDbStorage, JdbcTemplate jdbcTemplate, FeedService feedService,
                        DirectorDbStorage directorDbStorage) {
         this.filmDbStorage = filmDbStorage;
         this.userDbStorage = userDbStorage;
