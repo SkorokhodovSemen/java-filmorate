@@ -3,8 +3,6 @@ package ru.yandex.practicum.filmorate.model;
 import lombok.Data;
 
 import java.time.LocalDate;
-import java.util.ArrayList;
-import java.util.List;
 import java.util.Set;
 import java.util.TreeSet;
 
@@ -21,5 +19,4 @@ public class Film {
         else return 1;
     });
     private Mpa mpa;
-    private List<Director> directors = new ArrayList<>();
 }

@@ -57,35 +57,9 @@ public class FilmController {
     }
 
     @GetMapping("/popular")
-    public List<Film> getPopularFilmsWithGenreAndYear(@RequestParam(name = "count", defaultValue = "10") int count,
-                                                      @RequestParam(name = "genreId", defaultValue = "-1") int idGenre,
-                                                      @RequestParam(name = "year", defaultValue = "-1") int year) {
+    public List<Film> getPopularFilms(@RequestParam(defaultValue = "10") int count) {
         log.info("Получен запрос на получение списка популярных фильмов");
-        return filmService.getPopularFilmsWithGenreAndYear(count, idGenre, year);
+        return filmService.getPopularFilms(count);
     }
 
-    @GetMapping("/director/{directorId}")
-    public List<Film> getDirectorFilms(@PathVariable("directorId") int directorId, @RequestParam String sortBy) {
-        log.info("Получен запрос на получение списка фильмов режиссера с id=" + directorId + ", отсротированных по - "
-                + sortBy);
-        return filmService.getDirectorFilms(directorId, sortBy);
-    }
-
-    @DeleteMapping("/{filmId}")
-    public void deleteFilm(@PathVariable("filmId") int filmId) {
-        log.info("Получен запрос на удаление фильма с id = " + filmId);
-        filmService.delete(filmId);
-    }
-
-    @GetMapping("/search")
-    public List<Film> search(@RequestParam String query, @RequestParam String by) {
-        log.info("Получен запрос на поиск фильмов по - " + by + ", строка поиска - " + query);
-        return filmService.search(query, by);
-    }
-
-    @GetMapping("/common")
-    public List<Film> getCommonFilms(@RequestParam("userId") int userId, @RequestParam("friendId") int friendId) {
-        log.info("Получен запрос на получение списка общих с другом фильмов");
-        return filmService.getCommonFilms(userId, friendId);
-    }
 }

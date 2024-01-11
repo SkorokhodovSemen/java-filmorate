@@ -21,6 +21,7 @@ public class GenreService {
         this.jdbcTemplate = jdbcTemplate;
     }
 
+
     public List<Genre> findAll() {
         return genreDbStorage.findAll();
     }

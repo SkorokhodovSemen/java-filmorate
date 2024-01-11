@@ -12,12 +12,4 @@ public interface FilmStorageDao {
     int create(Film entity);
 
     int update(Film entity);
-
-    List<Film> getDirectorFilms(int directorId, String sortBy);
-
-    void deleteFilm(int filmId);
-
-    List<Film> search(String query, String by);
 }
-
-
