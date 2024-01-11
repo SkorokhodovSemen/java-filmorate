@@ -179,4 +179,42 @@ public class FilmDbStorage implements FilmStorageDao {
         String sql = "DELETE FROM film WHERE film_id = ?;";
         jdbcTemplate.update(sql, filmId);
     }
+
+    @Override
+    public List<Film> search(String query, String by) {
+        List<Film> films = new ArrayList<>();
+        String newQuery = "%" + query.toLowerCase() + "%";
+
+        if ("title".equals(by)) {
+            String sql = "SELECT f.*, m.name_rate FROM film f " +
+                    "JOIN mpa m ON f.mpa = m.id " +
+                    "WHERE LOWER(f.name) LIKE ? " +
+                    "ORDER BY f.rate DESC;";
+            films = jdbcTemplate.query(sql, FilmDbStorage::makeFilm, newQuery);
+        }
+
+        if ("director".equals(by)) {
+            String sql = "SELECT f.*, m.name_rate, d.name_director " +
+                    "FROM film f " +
+                    "JOIN mpa m ON f.mpa = m.id " +
+                    "JOIN film_director fd ON fd.film_id=f.film_id " +
+                    "JOIN director d ON d.id = fd.director_id " +
+                    "WHERE LOWER(d.name_director) LIKE ? " +
+                    "ORDER BY f.rate DESC;";
+            films = jdbcTemplate.query(sql, FilmDbStorage::makeFilm, newQuery);
+        }
+
+        if ("director,title".equals(by) || "title,director".equals(by)) {
+            String sql = "SELECT f.*, m.name_rate, d.name_director " +
+                    "FROM film f JOIN mpa m ON f.MPA = m.ID " +
+                    "LEFT JOIN film_director fd ON fd.film_id=f.film_id " +
+                    "LEFT JOIN director d ON d.id = fd.director_id " +
+                    "WHERE LOWER(d.name_director) LIKE ? " +
+                    "OR LOWER(f.name) LIKE ? " +
+                    "ORDER BY f.rate;";
+            films = jdbcTemplate.query(sql, FilmDbStorage::makeFilm, newQuery, newQuery);
+        }
+
+        return films;
+    }
 }

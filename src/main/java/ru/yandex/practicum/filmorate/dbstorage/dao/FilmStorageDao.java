@@ -16,6 +16,8 @@ public interface FilmStorageDao {
     List<Film> getDirectorFilms(int directorId, String sortBy);
 
     void deleteFilm(int filmId);
+
+    List<Film> search(String query, String by);
 }
 
 

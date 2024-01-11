@@ -76,4 +76,10 @@ public class FilmController {
         log.info("Получен запрос на удаление фильма с id = " + filmId);
         filmService.delete(filmId);
     }
+
+    @GetMapping("/search")
+    public List<Film> search(@RequestParam String query, @RequestParam String by) {
+        log.info("Получен запрос на поиск фильмов по - " + by + ", строка поиска - " + query);
+        return filmService.search(query, by);
+    }
 }
