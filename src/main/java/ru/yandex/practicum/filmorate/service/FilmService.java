@@ -28,18 +28,20 @@ public class FilmService {
     private final FilmLikesDbStorage filmLikesDbStorage;
     private final FilmGenreDbStorage filmGenreDbStorage;
     private final JdbcTemplate jdbcTemplate;
+    private final FeedService feedService;
     private Logger log = LoggerFactory.getLogger(FilmService.class);
     private final DirectorDbStorage directorDbStorage;
 
     @Autowired
     public FilmService(FilmDbStorage filmDbStorage, UserDbStorage userDbStorage, FilmLikesDbStorage filmLikesDbStorage,
-                       FilmGenreDbStorage filmGenreDbStorage, JdbcTemplate jdbcTemplate,
+                       FilmGenreDbStorage filmGenreDbStorage, JdbcTemplate jdbcTemplate, FeedService feedService,
                        DirectorDbStorage directorDbStorage) {
         this.filmDbStorage = filmDbStorage;
         this.userDbStorage = userDbStorage;
         this.filmLikesDbStorage = filmLikesDbStorage;
         this.filmGenreDbStorage = filmGenreDbStorage;
         this.jdbcTemplate = jdbcTemplate;
+        this.feedService = feedService;
         this.directorDbStorage = directorDbStorage;
     }
 
@@ -139,12 +141,14 @@ public class FilmService {
         validFound(idFilm);
         validFoundForUser(idUser);
         filmLikesDbStorage.deleteLike(idFilm, idUser);
+        feedService.createDeleteLikesEvent(idUser, idFilm);
     }
 
     public void addLikes(int idFilm, int idUser) {
         validFound(idFilm);
         validFoundForUser(idUser);
         filmLikesDbStorage.addLikes(idFilm, idUser);
+        feedService.addLikesEvent(idUser, idFilm);
     }
 
     void validate(Film film) {
