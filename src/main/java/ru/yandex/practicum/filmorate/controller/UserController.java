@@ -5,7 +5,9 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
 import ru.yandex.practicum.filmorate.model.Film;
+import ru.yandex.practicum.filmorate.model.FeedEvent;
 import ru.yandex.practicum.filmorate.model.User;
+import ru.yandex.practicum.filmorate.service.FeedService;
 import ru.yandex.practicum.filmorate.service.UserService;
 
 import java.util.List;
@@ -15,10 +17,12 @@ import java.util.List;
 public class UserController {
     private Logger log = LoggerFactory.getLogger(UserController.class);
     private UserService userService;
+    private FeedService feedService;
 
     @Autowired
-    public UserController(UserService userService) {
+    public UserController(UserService userService, FeedService feedService) {
         this.userService = userService;
+        this.feedService = feedService;
     }
 
     @GetMapping
@@ -67,6 +71,13 @@ public class UserController {
     public List<User> getCommonFriends(@PathVariable("id") int id, @PathVariable("otherId") int otherId) {
         log.info("Получен запрос на получение списка общих друзей для пользователей с id {} и {}", id, otherId);
         return userService.getCommonFriends(id, otherId);
+    }
+
+    @GetMapping("/{id}/feed")
+    public List<FeedEvent> getFeedForUser(@PathVariable("id") int idUser) {
+        userService.findById(idUser);
+        log.info("Получен запрос на получение списка последних событий для пользователей с id {}", idUser);
+        return feedService.getFeedForUser(idUser);
     }
 
     @GetMapping("/{id}/recommendations")
