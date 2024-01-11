@@ -26,12 +26,6 @@ public class FilmController {
         return filmService.findAll();
     }
 
-    @GetMapping("/common")
-    public List<Film> getCommonFilms(@RequestParam("userId") int userId, @RequestParam("friendId") int friendId) {
-        log.info("Получен запрос на получение списка общих с другом фильмов");
-        return filmService.getCommonFilms(userId, friendId);
-    }
-
     @GetMapping("/{id}")
     public Film findById(@PathVariable("id") int id) {
         log.info("Получен запрос на поиск фильма по id {}", id);
@@ -81,5 +75,11 @@ public class FilmController {
     public void deleteFilm(@PathVariable("filmId") int filmId) {
         log.info("Получен запрос на удаление фильма с id = " + filmId);
         filmService.delete(filmId);
+    }
+
+    @GetMapping("/search")
+    public List<Film> search(@RequestParam String query, @RequestParam String by) {
+        log.info("Получен запрос на поиск фильмов по - " + by + ", строка поиска - " + query);
+        return filmService.search(query, by);
     }
 }

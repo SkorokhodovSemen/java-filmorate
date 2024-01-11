@@ -245,13 +245,27 @@ public class FilmService {
 
     public List<Film> getDirectorFilms(int directorId, String sortBy) {
         directorDbStorage.findById(directorId);
-        return filmDbStorage.getDirectorFilms(directorId, sortBy).stream().map(film -> {
-            try {
-                return makeGenreForFilm(film);
-            } catch (SQLException e) {
-                throw new SqlException("Ошибка в добавлении жанров для фильма");
-            }
-        }).collect(Collectors.toList());
+        return filmDbStorage.getDirectorFilms(directorId, sortBy).stream()
+                .map(film -> {
+                    try {
+                        return makeGenreForFilm(film);
+                    } catch (SQLException e) {
+                        throw new SqlException("Ошибка в добавлении жанров для фильма");
+                    }
+                })
+                .collect(Collectors.toList());
+    }
+
+    public List<Film> search(String query, String by) {
+        return filmDbStorage.search(query, by).stream()
+                .map(film -> {
+                    try {
+                        return makeGenreForFilm(film);
+                    } catch (SQLException e) {
+                        throw new SqlException("Ошибка в добавлении жанров для фильма");
+                    }
+                })
+                .collect(Collectors.toList());
     }
 
     public List<Film> getCommonFilms(int userId, int friendId) {
