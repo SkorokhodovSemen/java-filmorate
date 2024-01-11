@@ -82,4 +82,10 @@ public class FilmController {
         log.info("Получен запрос на поиск фильмов по - " + by + ", строка поиска - " + query);
         return filmService.search(query, by);
     }
+
+    @GetMapping("/common")
+    public List<Film> getCommonFilms(@RequestParam("userId") int userId, @RequestParam("friendId") int friendId) {
+        log.info("Получен запрос на получение списка общих с другом фильмов");
+        return filmService.getCommonFilms(userId, friendId);
+    }
 }
