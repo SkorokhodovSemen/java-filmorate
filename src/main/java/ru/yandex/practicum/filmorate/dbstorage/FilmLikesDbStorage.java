@@ -29,6 +29,17 @@ public class FilmLikesDbStorage implements FilmLikesStorageDao {
     }
 
     @Override
+    public List<Film> getLikedFilms(int idUser1, int idUser2) {
+        String sql = "select * from film as f" +
+                " inner join mpa as m on f.mpa = m.id" +
+                " inner join film_likes as f_l on f.film_id = f_l.id_film" +
+                " where (f_l.id_user = ? and f_l.id_film =" +
+                " (select f_l.id_film from film_likes where film_likes.id_user = ?))" +
+                " order by f.rate desc";
+        return jdbcTemplate.query(sql, FilmDbStorage::makeFilm, idUser1, idUser2);
+    }
+
+    @Override
     public List<Film> getPopularFilmsWithGenre(int count, int idGenre) {
         String sql = "select * from film as f inner join mpa as m on f.mpa = m.id " +
                 "where (film_id = (select id_film from film_genre where genre_id = ?)) order by rate desc limit ?";

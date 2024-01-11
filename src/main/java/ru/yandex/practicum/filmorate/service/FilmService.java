@@ -253,4 +253,11 @@ public class FilmService {
             }
         }).collect(Collectors.toList());
     }
+
+    public List<Film> getCommonFilms(int userId, int friendId) {
+        validFoundForUser(userId);
+        validFoundForUser(friendId);
+        List<Film> usersLikedFilms = filmLikesDbStorage.getLikedFilms(userId, friendId);
+        return usersLikedFilms;
+    }
 }

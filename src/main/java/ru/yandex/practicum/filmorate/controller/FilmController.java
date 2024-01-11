@@ -26,6 +26,12 @@ public class FilmController {
         return filmService.findAll();
     }
 
+    @GetMapping("/common")
+    public List<Film> getCommonFilms(@RequestParam("userId") int userId, @RequestParam("friendId") int friendId) {
+        log.info("Получен запрос на получение списка общих с другом фильмов");
+        return filmService.getCommonFilms(userId, friendId);
+    }
+
     @GetMapping("/{id}")
     public Film findById(@PathVariable("id") int id) {
         log.info("Получен запрос на поиск фильма по id {}", id);
