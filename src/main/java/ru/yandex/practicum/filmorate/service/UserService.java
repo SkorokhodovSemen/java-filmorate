@@ -29,16 +29,18 @@ public class UserService {
     private final UserDbStorage userDbStorage;
     private final JdbcTemplate jdbcTemplate;
     private final UserRelationshipDbStorage userRelationshipDbStorage;
+    private final FeedService feedService;
     private final FilmLikesDbStorage filmLikesDbStorage;
 
     @Autowired
     public UserService(UserDbStorage userDbStorage, JdbcTemplate jdbcTemplate,
                        UserRelationshipDbStorage userRelationshipDbStorage,
-                       FilmLikesDbStorage filmLikesDbStorage) {
+                       FilmLikesDbStorage filmLikesDbStorage, FeedService feedService) {
         this.userDbStorage = userDbStorage;
         this.jdbcTemplate = jdbcTemplate;
         this.filmLikesDbStorage = filmLikesDbStorage;
         this.userRelationshipDbStorage = userRelationshipDbStorage;
+        this.feedService = feedService;
     }
 
     public List<User> findAll() {
@@ -65,12 +67,14 @@ public class UserService {
         validFound(idUser1);
         validFound(idUser2);
         userRelationshipDbStorage.addFriend(idUser1, idUser2);
+        feedService.addFriendsEvent(idUser1, idUser2);
     }
 
     public void deleteFriend(int idUser1, int idUser2) {
         validFound(idUser1);
         validFound(idUser2);
         userRelationshipDbStorage.deleteFriend(idUser1, idUser2);
+        feedService.createDeleteFriendsEvent(idUser1, idUser2);
     }
 
     public List<User> getCommonFriends(int idUser1, int idUser2) {

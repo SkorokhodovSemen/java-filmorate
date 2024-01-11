@@ -18,21 +18,27 @@ public class ReviewService {
 
     private final ReviewDbStorage reviewDbStorage;
     private final JdbcTemplate jdbcTemplate;
+    private FeedService feedService;
 
     @Autowired
-    public ReviewService(ReviewDbStorage reviewDbStorage, JdbcTemplate jdbcTemplate) {
+    public ReviewService(ReviewDbStorage reviewDbStorage, JdbcTemplate jdbcTemplate, FeedService feedService) {
         this.reviewDbStorage = reviewDbStorage;
         this.jdbcTemplate = jdbcTemplate;
+        this.feedService = feedService;
     }
 
     public Review create(Review review) {
         validate(review);
-        return reviewDbStorage.createReview(review);
+        Review review1 = reviewDbStorage.createReview(review);
+        feedService.addReviewEvent(review.getUserId(), review1.getReviewId());
+        return review1;
     }
 
     public Review update(Review review) {
         validate(review);
-        return reviewDbStorage.update(review);
+        Review review1 = reviewDbStorage.update(review);
+        feedService.updateReviewEvent(review1.getUserId(), review1.getReviewId());
+        return review1;
     }
 
     public Review getById(Integer id) {
@@ -53,7 +59,9 @@ public class ReviewService {
     }
 
     public void deleteReview(Integer id) {
+        Review review = reviewDbStorage.getById(id);
         reviewDbStorage.deleteReview(id);
+        feedService.createDeleteReviewEvent(review.getUserId(), id);
     }
 
     void validate(Review review) {
