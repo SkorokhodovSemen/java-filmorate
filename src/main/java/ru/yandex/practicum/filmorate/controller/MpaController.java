@@ -1,5 +1,6 @@
 package ru.yandex.practicum.filmorate.controller;
 
+import lombok.extern.slf4j.Slf4j;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -13,9 +14,9 @@ import ru.yandex.practicum.filmorate.service.MpaService;
 import java.util.List;
 
 @RestController
+@Slf4j
 @RequestMapping("/mpa")
 public class MpaController {
-    private Logger log = LoggerFactory.getLogger(MpaController.class);
     private MpaService mpaService;
 
     @Autowired
