@@ -42,7 +42,9 @@ public class FilmLikesDbStorage implements FilmLikesStorageDao {
     @Override
     public List<Film> getPopularFilmsWithGenre(int count, int idGenre) {
         String sql = "select * from film as f inner join mpa as m on f.mpa = m.id " +
-                "where (film_id = (select id_film from film_genre where genre_id = ?)) order by rate desc limit ?";
+                "inner join film_genre as f_g on f.film_id = f_g.id_film " +
+                "where genre_id = ? " +
+                "order by rate desc limit ?";
         return jdbcTemplate.query(sql, FilmDbStorage::makeFilm, idGenre, count);
     }
 
@@ -57,8 +59,9 @@ public class FilmLikesDbStorage implements FilmLikesStorageDao {
     @Override
     public List<Film> getPopularFilmsWithGenreAndYear(int count, int idGenre, int year) {
         String sql = "select * from film as f inner join mpa as m on f.mpa = m.id " +
-                "where (select extract (year from cast (release_data as date)) = ?" +
-                "and film_id = (select id_film from film_genre where genre_id = ?)) order by rate desc limit ?";
+                "inner join film_genre as f_g on f.film_id = f_g.id_film " +
+                "where ((select extract (year from cast (release_data as date)) = ?) " +
+                "and genre_id = ?) order by rate desc limit ?";
         return jdbcTemplate.query(sql, FilmDbStorage::makeFilm, year, idGenre, count);
     }
 
