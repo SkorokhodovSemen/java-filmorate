@@ -7,7 +7,6 @@ import ru.yandex.practicum.filmorate.model.Film;
 
 import java.util.*;
 import java.util.Map.Entry;
-//For pr
 @Component
 public class FilmLikesDbStorage implements FilmLikesStorageDao {
     private final JdbcTemplate jdbcTemplate;
