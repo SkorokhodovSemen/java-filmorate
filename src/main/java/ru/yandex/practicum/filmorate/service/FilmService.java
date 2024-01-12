@@ -1,5 +1,6 @@
 package ru.yandex.practicum.filmorate.service;
 
+import lombok.extern.slf4j.Slf4j;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -20,6 +21,7 @@ import java.util.*;
 import java.util.stream.Collectors;
 
 @Service
+@Slf4j
 public class FilmService {
     private static final int MAX_SYMBOLS = 200;
     private static final LocalDate RELEASE_DATA = LocalDate.of(1895, 12, 28);
@@ -29,7 +31,6 @@ public class FilmService {
     private final FilmGenreDbStorage filmGenreDbStorage;
     private final JdbcTemplate jdbcTemplate;
     private final FeedService feedService;
-    private Logger log = LoggerFactory.getLogger(FilmService.class);
     private final DirectorDbStorage directorDbStorage;
 
     @Autowired
