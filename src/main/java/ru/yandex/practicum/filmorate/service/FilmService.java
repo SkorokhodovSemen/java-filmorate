@@ -1,8 +1,6 @@
 package ru.yandex.practicum.filmorate.service;
 
 import lombok.extern.slf4j.Slf4j;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.jdbc.support.rowset.SqlRowSet;
@@ -108,7 +106,7 @@ public class FilmService {
                         try {
                             return addDirector(makeGenreForFilm(film));
                         } catch (SQLException e) {
-                            throw new SqlException("Ошибка в добавлении жанров для фильма");
+                            throw new SqlException("Ошибка в запросе");
                         }
                     })
                     .collect(Collectors.toList());
@@ -269,7 +267,7 @@ public class FilmService {
                 .collect(Collectors.toList());
     }
 
-    public List<Film> getCommonFilms(int userId, int friendId) {
+    public List<Film> checkUserExists(int userId, int friendId) {
         validFoundForUser(userId);
         validFoundForUser(friendId);
         List<Film> usersLikedFilms = filmLikesDbStorage.getLikedFilms(userId, friendId);
